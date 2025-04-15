@@ -1,0 +1,28 @@
+<!-- student_detail.html -->
+<h2>Student Detail</h2>
+<p><strong>ID:</strong> {{ student['id'] }}</p>
+<p><strong>Name:</strong> {{ student['name'] }}</p>
+<p><strong>Email:</strong> {{ student['email'] }}</p>
+<p><strong>Marks:</strong> {{ student['marks'] }}</p>
+
+<a href="{{ url_for('student_profile') }}">Back to list</a>
+<!-- student_detail.html -->
+
+
+<h2>Student Profile</h2>
+<p><strong>Name:</strong> {{ student.name }}</p>
+<p><strong>Class:</strong> {{ student.class }}</p>
+<p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+<p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+<img src="{{ url_for('static', filename='uploads/' + student.profile_photo) }}" width="100">
+<!--                     <a href="{{ url_for('delete_student', id=student.id) }}" class="delete-btn">Delete</a>
+<!--                     <a href="{{ url_for('edit_student', id=student.id) }}" class="edit-btn">Edit</a>
+<!--                     <a href="{{ url_for('student_detail', student_id=student.id) }}" class="view-btn">View</a>
+<!--                     <a href="{{ url_for('generate_marksheet', student_id=student.id) }}" class="download-btn">Download Marksheet</a>
+<!--                     <a href="{{ url_for('student_dashboard', student_id=student.id) }}" class="dashboard-btn">Dashboard</a> -->
+<!--                     <a href="{{ url_for('student_profile') }}" class="back-btn">Back to Students</a> -->
+<!--      
+ -->
+ -->
+ -->
+ -->

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marksheet Management Portal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+  <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <script>
+        {% for category, message in messages %}
+            Swal.fire({
+                icon: "{{ 'success' if category == 'success' else 'error' if category == 'danger' else 'info' }}",
+                title: "{{ category.capitalize() }}",
+                text: "{{ message }}"
+            });
+        {% endfor %}
+        </script>
+    {% endif %}
+{% endwith %}
+
+<body>
+  <!-- Preloader -->
+  <div id="loader-wrapper">
+    <div class="loader"></div>
+  </div>
+
+  
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='images/logo.png') }}" alt="College Logo">
+      <span>Marksheet Management Portal</span>
+    </div>
+
+    <div class="hamburger">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/features">Features</a></li>
+      <li><a href="/contact">Contact Us</a></li>
+      <li><a href="/help">Help</a></li>
+      <li><a href="/login" class="btn-login">Login</a></li>
+      <li><button class="theme-toggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button></li>
+    </ul>
+  </nav>
+
+
+
+  <!-- Page Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Back to Top Button -->
+  <button id="back-to-top" title="Back to Top"><i class="fas fa-arrow-up"></i></button>
+
+  <!-- Footer -->
+  <footer>
+        <footer class="footer">
+          <div class="footer-content">
+              <p>&copy; 2025 Student Marksheet Management System. All rights reserved.</p>
+              <p>Developed by: <a href="https://github.com/Sarbeswarpanda04" class="developer-link">Sarbeswar Panda</a></p>
+              <div class="footer-links">
+                  <a href="#"><i class="fas fa-question-circle"></i> Help</a>
+                  <a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+                  <a href="#"><i class="fas fa-envelope"></i> Contact Us</a>
+              </div>
+</footer>
+
+
+</body>
+</html>

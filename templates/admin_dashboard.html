@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #3498db,rgba(32, 18, 157, 0.73));
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            background-color:rgb(37, 0, 132);
+            color: white;
+            position: fixed;
+        }
+        .sidebar .profile-pic {
+          width: 80px;
+          border-radius: 50%;
+          margin-bottom: 10px;
+        }
+        .sidebar .profile-section {
+            text-align: center;
+            padding: 1rem;
+        }
+        .sidebar .profile-section h4 {
+            margin: 10px 0;
+        }      
+        .sidebar h4 {
+            padding: 1rem;
+            text-align: center;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px 20px;
+        }
+        .sidebar ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+        }
+        .sidebar ul li a:hover {
+            background-color:rgb(202, 243, 120);
+            border-radius: 5px;
+            color: black;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 2rem;
+        }
+        .card {
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .feature-box:hover {
+            transform: scale(1.03);
+            transition: 0.3s;
+        }
+        .feature-box {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .feature-box h6 {
+            margin-bottom: 10px;
+        }
+        .feature-box a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        .feature-box a:hover {
+            text-decoration: underline;
+        }
+        .card h5 {
+            margin: 0;
+        }
+        .card h3 {
+            margin-top: 10px;
+            font-size: 2rem;
+        }
+        .card p {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .card.bg-primary {
+            background-color: #007bff !important;
+        }
+        .card.bg-success {
+            background-color: #28a745 !important;
+        }
+        .card.bg-warning {
+            background-color: #ffc107 !important;
+        }
+        .card.bg-info {
+            background-color: #17a2b8 !important;
+        }
+        .card.bg-danger {
+            background-color: #dc3545 !important;
+        }
+        .card.bg-secondary {
+            background-color: #6c757d !important;
+        }
+        .card.bg-light {
+            background-color: #f8f9fa !important;
+        }
+        .card.bg-dark {
+            background-color: #343a40 !important;
+        }
+        .card.bg-white {
+            background-color: #ffffff !important;
+        }
+        .card.bg-transparent {
+            background-color: transparent !important;
+        }
+    </style>
+</head>
+<body>
+    
+  <aside class="sidebar">
+    <div class="profile-section">
+      <img src="{{ url_for('static', filename='images/profile_default.png') }}" class="profile-pic" alt="Admin">
+      <h4>Admin Name</h4>
+      <!--here admin name should show in header fetches from database-->
+      
+      <ul class="sidebar-links">
+        <li><a href="#"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+        <li><a href="#"><i class="fas fa-key"></i> Change Password</a></li>
+        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </div>
+    <hr>
+    <nav class="main-links">
+      <ul>
+        <li><a href="#"><i class="fas fa-users"></i> Student's Profile</a></li>
+        <li><a href="#"><i class="fas fa-book"></i> Subject & Class Management</a></li>
+        <li><a href="#"><i class="fas fa-chart-line"></i> Marks Management</a></li>
+        <li><a href="#"><i class="fas fa-file-alt"></i> Report Generation</a></li>
+        <li><a href="#"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li>
+        <li><a href="#"><i class="fas fa-bullhorn"></i> Notifications</a></li>
+        <li><a href="#"><i class="fas fa-sliders-h"></i> Settings</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+
+    <div class="content">
+        <h2 class="mb-4"> Welcome To Admin Dashboard !</h2>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary p-3">
+                    <h5>Total Students</h5>
+                    <h3>{{ total_students }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success p-3">
+                    <h5>Total Subjects</h5>
+                    <h3>{{ total_subjects }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning p-3">
+                    <h5>Total Exams</h5>
+                    <h3>{{ total_exams }}</h3>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info p-3">
+                    <h5>Latest Marksheet</h5>
+                    <p>{{ latest_mark }}</p>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mb-3">📁 Navigation</h4>
+        <div class="row g-4">
+            {% for label, route in [
+                ('Student Profile', 'student-profile'),
+                ('Subject & Class Management', 'subject-class'),
+                ('Marks Management', 'marks-management'),
+                ('Report Generation', 'report-generation'),
+                ('Exam & Grade Setup', 'exam-grade-setup'),
+                ('Notifications / Announcements', 'notifications'),
+                ('Settings', 'settings')
+            ] %}
+            <div class="col-md-3">
+                <div class="card p-3 text-center feature-box">
+                    <h6>{{ label }}</h6>
+                    <a href="/{{ route }}" class="btn btn-outline-primary btn-sm mt-2">Open</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

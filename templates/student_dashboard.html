@@ -1,0 +1,152 @@
+<!-- Student Dashboard -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.name }}'s Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/student_dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome, {{ student.name }}</h2>
+
+        <h3>Your Dashboard</h3>
+        <div class="actions">
+            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+        </div>
+
+
+
+
+
+
+
+
+        <!-- Sidebar Navigation (Optional) -->
+
+        <div class="sidebar">
+            <h4>Navigation</h4>
+            <ul>
+                
+            </ul>
+        </div>
+        <div class="content">
+            <h3>Student Information</h3>
+            <p><strong>ID:</strong> {{ student.id }}</p>
+            <p><strong>Name:</strong> {{ student.name }}</p>
+            <p><strong>Email:</strong> {{ student.email }}</p>
+            <p><strong>Class:</strong> {{ student.class }}</p>
+            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+            <p><strong>Address:</strong> {{ student.address }}</p>
+            <p><strong>Phone:</strong> {{ student.phone }}</p>
+        </div>
+
+        <!-- 
+        <div class="features">
+            <div class="feature-box">
+                <i class="fas fa-user-graduate"></i>
+                <h3>View Profile</h3>
+                <p>Check your personal details and profile information.</p>
+                <i class="fas fa-book"></i>
+                <h3>View Marks</h3>
+                <p>Check your exam records and marks.</p>
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Exam Schedule</h3>
+                <p>View your upcoming exams and schedules.</p>
+                <i class="fas fa-comments"></i>
+                <h3>Contact Admin</h3>
+                <p>Reach out to the admin for any queries or issues.</p>
+            </div>
+        </div> --> 
+
+        
+
+        <!-- Profile Photo Section -->
+        <div class="profile-photo-container">
+            <img src="{{ url_for('static', filename='images/student_photos/' + (student.profile_photo if student.profile_photo else 'default.png')) }}" alt="Profile Photo" class="profile-photo">
+            <h3>{{ student.name }}</h3>
+            <p><strong>Class:</strong> {{ student.class }}</p>
+            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+            <p><strong>Email:</strong> {{ student.email }}</p>
+        </div>
+
+        <!-- Student Information -->
+        <div class="info-box">
+            <h3>Student Information</h3>
+            <p><strong>ID:</strong> {{ student.id }}</p>
+            <p><strong>Name:</strong> {{ student.name }}</p>
+            <p><strong>Email:</strong> {{ student.email }}</p>
+            <p><strong>Class:</strong> {{ student.class }}</p>
+            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+            <p><strong>Address:</strong> {{ student.address }}</p>
+            <p><strong>Phone:</strong> {{ student.phone }}</p>
+        </div>
+
+        <!-- Overall Percentage -->
+        <div class="graph-container">
+            <h3 class="graph-title">Overall Percentage</h3>
+            <div class="graph" style="width: 100%;">
+                <div class="graph-bar-value" style="width: {{ percentage }}%;">{{ percentage }}%</div>
+            </div>
+        </div>
+
+        <!-- Exam Records -->
+        <h3>Exam Records</h3>
+        {% if records %}
+        <table>
+            <tr>
+                <th>Exam</th>
+                <th>Subject</th>
+                <th>Marks</th>
+                <th>Actions</th>
+            </tr>
+            {% for row in records %}
+            <tr>
+                <td>{{ row.exam_name }}</td>
+                <td>{{ row.subject_name }}</td>
+                <td>{{ row.marks }}</td>
+                <td>
+                    <a href="#" class="edit-btn">✏️ Edit</a> |
+                    <a href="#" class="delete-btn">🗑️ Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+        <p style="text-align:center;">No marks added yet.</p>
+        {% endif %}
+
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <script>
+            {% for category, message in messages %}
+                Swal.fire({
+                    icon: "{{ 'success' if category == 'success' else 'error' if category == 'danger' else 'info' }}",
+                    title: "{{ category.capitalize() }}",
+                    text: "{{ message | e }}"
+                });
+            {% endfor %}
+            </script>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+    <script>
+        particlesJS.load('particles', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json', function() {
+            console.log('Particles.js loaded');
+        });
+    </script>
+</body>
+</html>

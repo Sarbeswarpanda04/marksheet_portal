@@ -1,0 +1,60 @@
+/* Dark Mode Styles */
+body.dark-mode {
+    --primary-color: #64b5f6;
+    --secondary-color: #a1c4fd;
+    --background-color: #1a1a2e;
+    --text-color: #ffffff;
+    --card-background: #22223a;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode Specific Overrides */
+body.dark-mode .theme-toggle {
+    background: var(--card-background);
+    color: var(--text-color);
+}
+
+body.dark-mode .login-card {
+    background: var(--card-background);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .form-group input {
+    background-color: #2a2a45;
+    border-color: #3a3a5a;
+    color: var(--text-color);
+}
+
+body.dark-mode .form-group input::placeholder {
+    color: #8888a0;
+}
+
+body.dark-mode .form-group input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+}
+
+body.dark-mode .btn-primary {
+    background-color: var(--primary-color);
+}
+
+body.dark-mode .btn-secondary {
+    background-color: #4a4a6a;
+}
+
+body.dark-mode .footer-links a {
+    color: var(--text-color);
+}
+
+body.dark-mode .footer-links a:hover {
+    color: var(--primary-color);
+}
+
+/* Dark Mode Animation */
+.theme-toggle,
+body,
+.login-card,
+.btn,
+input {
+    transition: all 0.3s ease-in-out;
+} 

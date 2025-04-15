@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<section class="hero">
+    <h1>Welcome to Marksheet Management Portal</h1>
+    <p>Access your academic marksheet anytime, anywhere!</p>
+</section>
+
+
+<!--this section shows the top3 students mark with their profile picture , name roll no and percentage like a banner and 
+this details will directly fetch from students databases -->
+
+<!-- Top 3 Students Section -->
+<section class="top-students">
+    <h2>🏆 Top 3 Students</h2>
+    <div class="students-banner">
+        {% for student in top_students %}
+        <div class="student-card">
+            <img src="{{ url_for('static', filename='images/student_photos/' + (student.profile_photo if student.profile_photo else 'default.png')) }}" alt="{{ student.name }}" class="student-photo">
+            <h3>{{ student.name }}</h3>
+            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+            <p><strong>Percentage:</strong> {{ student.percentage }}%</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+
+<section class="contact-form">
+  <h2>Contact Us</h2>
+  <form action="/feedback" method="POST">
+      <input type="text" name="name" placeholder="Your Name" required>
+      <input type="email" name="email" placeholder="Your Email" required>
+      <textarea name="message" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Message</button>
+  </form>
+</section>
+<div class="social-media">
+    <h2>Follow Us</h2>
+    <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="https://www.twitter.com" target="_blank"><i class="fab fa-twitter"></i></a>
+    <a href="https://www.instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
+    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+</div>
+
+<div class="subscribe-form">
+    <h2>Subscribe to Our Newsletter</h2>
+    <form action="/subscribe" method="POST">
+        <input type="email" name="email" placeholder="Your Email" required>
+        <button type="submit">Subscribe</button>
+    </form>
+</div>
+
+<div class="faq">
+    <h2>Frequently Asked Questions</h2>
+    <ul>
+        <li><strong>How do I access my marksheet?</strong> You can log in to your account and navigate to the marksheet section.</li>
+        <li><strong>What if I forget my password?</strong> You can reset your password using the "Forgot Password" link on the login page.</li>
+        <li><strong>can i download my marksheet?</strong> Yes, you can download your marksheet in PDF format.</li> 
+    </ul>
+</div>
+
+
+
+
+<section class="notice">
+    <h3>📢 Latest Notices</h3>
+    <ul>
+        <li>Semester 2 Results Published!</li>
+        <li>Last date for rechecking: 25th March</li>
+    </ul>
+</section>
+{% endblock %}
