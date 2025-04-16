@@ -128,32 +128,34 @@
 </head>
 <body>
     
-  <aside class="sidebar">
-    <div class="profile-section">
-      <img src="{{ url_for('static', filename='images/profile_default.png') }}" class="profile-pic" alt="Admin">
-      <h4>Admin Name</h4>
-      <!--here admin name should show in header fetches from database-->
-      
-      <ul class="sidebar-links">
-        <li><a href="#"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
-        <li><a href="#"><i class="fas fa-key"></i> Change Password</a></li>
-        <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-      </ul>
-    </div>
-    <hr>
-    <nav class="main-links">
-      <ul>
-        <li><a href="#"><i class="fas fa-users"></i> Student's Profile</a></li>
-        <li><a href="#"><i class="fas fa-book"></i> Subject & Class Management</a></li>
-        <li><a href="#"><i class="fas fa-chart-line"></i> Marks Management</a></li>
-        <li><a href="#"><i class="fas fa-file-alt"></i> Report Generation</a></li>
-        <li><a href="#"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li>
-        <li><a href="#"><i class="fas fa-bullhorn"></i> Notifications</a></li>
-        <li><a href="#"><i class="fas fa-sliders-h"></i> Settings</a></li>
-      </ul>
-    </nav>
-  </aside>
-
+    <aside class="sidebar">
+        <div class="profile-section">
+            <!-- Display admin's profile picture -->
+            <img src="{{ url_for('static', filename='images/admin_photos/' + (admin.profile_photo if admin.profile_photo else 'icons8-user-default-64.png')) }}" 
+                 class="profile-pic" alt="Admin Profile Picture">
+            
+            <!-- Display admin's name -->
+            <h4>{{ admin.name }}</h4>
+            
+            <ul class="sidebar-links">
+                <li><a href="#"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                <li><a href="#"><i class="fas fa-key"></i> Change Password</a></li>
+                <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+        <hr>
+        <nav class="main-links">
+            <ul>
+                <li><a href="#"><i class="fas fa-users"></i> Student's Profile</a></li>
+                <li><a href="#"><i class="fas fa-book"></i> Subject & Class Management</a></li>
+                <li><a href="#"><i class="fas fa-chart-line"></i> Marks Management</a></li>
+                <li><a href="#"><i class="fas fa-file-alt"></i> Report Generation</a></li>
+                <li><a href="#"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li>
+                <li><a href="#"><i class="fas fa-bullhorn"></i> Notifications</a></li>
+                <li><a href="#"><i class="fas fa-sliders-h"></i> Settings</a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <div class="content">
         <h2 class="mb-4"> Welcome To Admin Dashboard !</h2>

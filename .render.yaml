@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: flask-marksheet-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app"
+    envVars:
+      - key: DB_HOST
+        value: mysql-d8d8c8a-sarbeswarpanda143-36cb.f.aivencloud.com
+      - key: DB_USER
+        value: avnadmin
+      - key: DB_PASSWORD
+        value: AVNS__Nh9xl2rlVgCUarubfp
+      - key: DB_NAME
+        value: marksheet_portal

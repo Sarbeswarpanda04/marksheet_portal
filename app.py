@@ -326,35 +326,85 @@ def student_dashboard():
 
 
 
+# @app.route('/admin-dashboard')
+# def admin_dashboard():
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+
+#     cursor.execute("SELECT COUNT(*) FROM students")
+#     total_students = cursor.fetchone()[0]
+
+#     cursor.execute("SELECT COUNT(*) FROM subjects")
+#     total_subjects = cursor.fetchone()[0]
+
+#     cursor.execute("SELECT COUNT(*) FROM exams")
+#     total_exams = cursor.fetchone()[0]
+
+#     #Example placeholder for latest marksheet
+#     latest_mark = "Final_Exam_Results_2023"
+#     #cursor.execute("SELECT exam_id, student_id, generated_date FROM marksheet ORDER BY generated_date DESC LIMIT 1")      
+    
+
+#     conn.close()
+
+#     return render_template("admin_dashboard.html",
+#                            total_students=total_students,
+#                            total_subjects=total_subjects,
+#                            total_exams=total_exams,
+#                            latest_mark=latest_mark)
+
+
+
+
+
+
+
+
 @app.route('/admin-dashboard')
 def admin_dashboard():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access the dashboard.', 'danger')
+        return redirect(url_for('login'))
+
+    admin_id = session['admin_id']  # Get the logged-in admin's ID from the session
+
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT COUNT(*) FROM students")
-    total_students = cursor.fetchone()[0]
+    # Fetch admin details
+    cursor.execute("SELECT name, profile_photo FROM admin WHERE admin_id = %s", (admin_id,))
+    admin = cursor.fetchone()
 
-    cursor.execute("SELECT COUNT(*) FROM subjects")
-    total_subjects = cursor.fetchone()[0]
+    # Fetch dashboard statistics
+    cursor.execute("SELECT COUNT(*) AS total_students FROM students")
+    total_students = cursor.fetchone()['total_students']
 
-    cursor.execute("SELECT COUNT(*) FROM exams")
-    total_exams = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) AS total_subjects FROM subjects")
+    total_subjects = cursor.fetchone()['total_subjects']
 
-    #Example placeholder for latest marksheet
-    latest_mark = "Final_Exam_Results_2023"
-    #cursor.execute("SELECT exam_id, student_id, generated_date FROM marksheet ORDER BY generated_date DESC LIMIT 1")  
-    
-    
-    
+    cursor.execute("SELECT COUNT(*) AS total_exams FROM exams")
+    total_exams = cursor.fetchone()['total_exams']
 
+    cursor.execute("SELECT MAX(generated_date) AS latest_mark FROM marksheet")
+    latest_mark = cursor.fetchone()['latest_mark'] or "No marksheet available"
+
+    cursor.close()
     conn.close()
 
-    return render_template("admin_dashboard.html",
-                           total_students=total_students,
-                           total_subjects=total_subjects,
-                           total_exams=total_exams,
-                           latest_mark=latest_mark)
-
+    return render_template(
+        "admin_dashboard.html",
+        admin=admin,
+        total_students=total_students,
+        total_subjects=total_subjects,
+        total_exams=total_exams,
+        latest_mark=latest_mark
+    )
+    
+    
+    
+    
+    
 @app.route('/student-profile')
 def student_profile():
     conn = get_db_connection()
