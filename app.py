@@ -99,6 +99,13 @@ def login():
             session['username'] = username
             session['user_type'] = user_type
             session['email'] = user['email']
+            
+                     # Add role-specific identifiers
+            if user_type == 'admin':
+                session['admin_id'] = user['admin_id']  # Store admin_id for admin users
+            elif user_type == 'student':
+                session['student_id'] = user['id']  # Store student_id for student users
+            
 
             otp = str(random.randint(100000, 999999))
             session['otp'] = otp
@@ -244,17 +251,18 @@ def verify_otp():
 @app.route('/student_dashboard')
 def student_dashboard():
     # Ensure the user is logged in and is a student
-    if 'username' not in session or session.get('user_type') != 'student':
+    if 'student_id' not in session or session.get('user_type') != 'student':
         flash('Unauthorized access. Please log in as a student.', 'danger')
         return redirect(url_for('login'))
 
     # Fetch student details
-    username = session['username']
+    username = session['student_id']  # Use student ID for fetching details
+    # username = session['username']  # Use registration number for fetching details
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     # Get student info
-    cursor.execute("SELECT * FROM students WHERE registration_number = %s", (username,))
+    cursor.execute("SELECT * FROM students WHERE registration_number = %s", (student_id,))
     student = cursor.fetchone()
 
     # Get exam records for the student
