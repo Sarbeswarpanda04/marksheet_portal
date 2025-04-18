@@ -328,6 +328,51 @@ def edit_admin_profile():
 
     return render_template('edit_admin_profile.html', admin=admin)
 
+
+
+
+@app.route('/change-admin-password', methods=['POST'])
+def change_admin_password():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        return jsonify({'status': 'error', 'message': 'Please log in to change your password.'}), 401
+
+    admin_id = session['admin_id']  # Get the logged-in admin's ID from the session
+
+    # Get form data
+    current_password = request.form['current_password']
+    new_password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+
+    # Validate new password
+    if new_password != confirm_password:
+        return jsonify({'status': 'error', 'message': 'New passwords do not match.'}), 400
+
+    if not re.match(r'^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$', new_password):
+        return jsonify({'status': 'error', 'message': 'Password must be at least 6 characters, contain letters, numbers, and symbols.'}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Verify current password
+    cursor.execute("SELECT password FROM admin WHERE admin_id = %s", (admin_id,))
+    admin = cursor.fetchone()
+
+    if not admin or admin['password'] != current_password:
+        return jsonify({'status': 'error', 'message': 'Current password is incorrect.'}), 400
+
+    # Update the password
+    cursor.execute("UPDATE admin SET password = %s WHERE admin_id = %s", (new_password, admin_id))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'status': 'success', 'message': 'Password updated successfully.'})
+
+
+
+
 # @app.route('/admin-dashboard')
 # def admin_dashboard():
 #     # Ensure the admin is logged in
