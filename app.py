@@ -14,8 +14,8 @@ app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
-    MAIL_USERNAME='sarbeswarpanda143@gmail.com',        # Replace with your email
-    MAIL_PASSWORD='bfwtduylcewbalmp'            # Replace with your app password
+    MAIL_USERNAME='verify.marksheet.manage.portal@gmail.com',        # Replace with your email
+    MAIL_PASSWORD='redcvumsuuigdgra'            # Replace with your app password
 )
 mail = Mail(app)
 
