@@ -514,7 +514,10 @@ from werkzeug.utils import secure_filename
 
 UPLOAD_FOLDER = 'static/images/student_photos'  # Directory to save uploaded files
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'png', 'jpg', 'jpeg', 'gif', 'webp'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'images', 'student_photos')  # Ensure the path is correct
+
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -548,9 +551,9 @@ def add_student():
 
     conn.commit()
     conn.close()
-
+    
+    flash('Student added successfully!', 'success')
     return redirect(url_for('student_profile'))
-
 
 
 
