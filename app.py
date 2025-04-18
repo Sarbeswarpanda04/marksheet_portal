@@ -262,7 +262,7 @@ def student_dashboard():
     cursor = conn.cursor(dictionary=True)
 
     # Get student info
-    cursor.execute("SELECT * FROM students WHERE registration_number = %s", (student_id,))
+    cursor.execute("SELECT * FROM students WHERE registration_number = %s", (username,))
     student = cursor.fetchone()
 
     # Get exam records for the student
@@ -289,6 +289,44 @@ def student_dashboard():
                            percentage=round(percentage, 2))
 
 
+@app.route('/edit-admin-profile', methods=['GET', 'POST'])
+def edit_admin_profile():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    admin_id = session['admin_id']  # Get the logged-in admin's ID from the session
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        # Get updated details from the form
+        name = request.form['name']
+        email = request.form['email']
+        mobile = request.form['mobile']
+        password = request.form['password']
+
+        # Update the admin details in the database
+        cursor.execute("""
+            UPDATE admin
+            SET name = %s, email = %s, mobile = %s, password = %s
+            WHERE admin_id = %s
+        """, (name, email, mobile, password, admin_id))
+        conn.commit()
+
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('admin_dashboard'))
+
+    # Fetch the admin's current details for the form
+    cursor.execute("SELECT * FROM admin WHERE admin_id = %s", (admin_id,))
+    admin = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('edit_admin_profile.html', admin=admin)
 
 # @app.route('/admin-dashboard')
 # def admin_dashboard():

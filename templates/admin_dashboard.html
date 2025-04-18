@@ -139,7 +139,7 @@
             <h4>{{ admin.name }}</h4>  <!-- Display admin's Name -->
             
             <ul class="sidebar-links">
-                <li><a href="#"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
+                <li><a href="{{ url_for('edit_admin_profile') }}"><i class="fas fa-user-edit"></i> Edit Profile</a></li>
                 <li><a href="#"><i class="fas fa-key"></i> Change Password</a></li>
                 <li><a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
