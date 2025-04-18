@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject & Class Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">Subject & Class Management</h2>
+
+        <!-- Add Subject/Class Form -->
+        <form method="POST" action="{{ url_for('subject_class_management') }}" class="mb-4">
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="name" placeholder="Enter Name" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="code" placeholder="Enter Code (for subjects)">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="type" required>
+                        <option value="subject">Subject</option>
+                        <option value="class">Class</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Add</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Subjects Table -->
+        <h4>Subjects</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.code }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ subject.id }}" data-type="subject" data-name="{{ subject.name }}" data-code="{{ subject.code }}">Edit</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="{{ subject.id }}" data-type="subject">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Classes Table -->
+        <h4>Classes</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for class in classes %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ class.name }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning edit-btn" data-id="{{ class.id }}" data-type="class" data-name="{{ class.name }}">Edit</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="{{ class.id }}" data-type="class">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Handle Edit
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+                const name = prompt(`Edit ${type} name:`, this.getAttribute('data-name'));
+                const code = type === 'subject' ? prompt(`Edit ${type} code:`, this.getAttribute('data-code')) : null;
+
+                if (name) {
+                    let body = `name=${encodeURIComponent(name)}`;
+                    if (code) body += `&code=${encodeURIComponent(code)}`;
+
+                    fetch(`/edit-subject-class/${type}/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') location.reload();
+                    });
+                }
+            });
+        });
+
+        // Handle Delete
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const id = this.getAttribute('data-id');
+                const type = this.getAttribute('data-type');
+
+                if (confirm(`Are you sure you want to delete this ${type}?`)) {
+                    fetch(`/delete-subject-class/${type}/${id}`, {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') location.reload();
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -373,6 +373,7 @@ def change_admin_password():
 
 
 
+
 # @app.route('/admin-dashboard')
 # def admin_dashboard():
 #     # Ensure the admin is logged in
@@ -695,6 +696,91 @@ def edit_student(id):
     conn.close()
 
     return jsonify(student)
+
+
+
+
+@app.route('/subject-class', methods=['GET', 'POST'])
+def subject_class_management():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        # Add a new subject or class
+        name = request.form['name']
+        code = request.form.get('code')  # Optional for classes
+        type = request.form['type']  # 'subject' or 'class'
+
+        if type == 'subject':
+            cursor.execute("INSERT INTO subjects (name, code) VALUES (%s, %s)", (name, code))
+        elif type == 'class':
+            cursor.execute("INSERT INTO classes (name) VALUES (%s)", (name,))
+        conn.commit()
+        flash(f'{type.capitalize()} added successfully!', 'success')
+        return redirect(url_for('subject_class_management'))
+
+    # Fetch all subjects and classes
+    cursor.execute("SELECT * FROM subjects")
+    subjects = cursor.fetchall()
+
+    cursor.execute("SELECT * FROM classes")
+    classes = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('subject_class_management.html', subjects=subjects, classes=classes)
+
+
+@app.route('/edit-subject-class/<string:type>/<int:id>', methods=['POST'])
+def edit_subject_class(type, id):
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        return jsonify({'status': 'error', 'message': 'Please log in to edit.'}), 401
+
+    name = request.form['name']
+    code = request.form.get('code')  # Optional for classes
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if type == 'subject':
+        cursor.execute("UPDATE subjects SET name = %s, code = %s WHERE id = %s", (name, code, id))
+    elif type == 'class':
+        cursor.execute("UPDATE classes SET name = %s WHERE id = %s", (name, id))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'status': 'success', 'message': f'{type.capitalize()} updated successfully!'})
+
+
+@app.route('/delete-subject-class/<string:type>/<int:id>', methods=['POST'])
+def delete_subject_class(type, id):
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        return jsonify({'status': 'error', 'message': 'Please log in to delete.'}), 401
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if type == 'subject':
+        cursor.execute("DELETE FROM subjects WHERE id = %s", (id,))
+    elif type == 'class':
+        cursor.execute("DELETE FROM classes WHERE id = %s", (id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({'status': 'success', 'message': f'{type.capitalize()} deleted successfully!'})
+
 
 # @app.route('/edit-student/<int:id>', methods=['GET', 'POST'])
 # def edit_student(id):
