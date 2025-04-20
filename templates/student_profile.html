@@ -516,14 +516,12 @@
         <span class="close">&times;</span>
         <h2>Edit Student Details</h2>
         <form id="editStudentForm" method="POST" enctype="multipart/form-data">
-            <!-- Display Current Photo -->
             <label>Current Photo:</label><br>
             <img id="editPhotoPreview" src="" alt="Profile Photo" style="width: 100px; height: 100px; border-radius: 50%;"><br>
-
-            <!-- Upload New Photo -->
+        
             <label>Change Photo:</label><br>
             <input type="file" name="profile_photo" id="editProfilePhoto" accept="image/*"><br>
-
+        
             <input type="text" name="name" id="editName" placeholder="Name" required><br>
             <input type="text" name="student_class" id="editClass" placeholder="Class" required><br>
             <input type="text" name="roll_no" id="editRollNo" placeholder="Roll No" required><br>
@@ -533,8 +531,7 @@
             <input type="date" name="dob" id="editDob" required><br>
             <input type="email" name="email" id="editEmail" placeholder="Email" required><br>
             <input type="text" name="password" id="editPassword" placeholder="Password" required><br>
-
-            
+        
             <button type="submit">Update</button>
         </form>
     </div>

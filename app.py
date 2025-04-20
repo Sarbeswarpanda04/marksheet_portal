@@ -650,41 +650,52 @@ def edit_student(id):
     cursor = conn.cursor(dictionary=True)
 
     if request.method == 'POST':
-        # Get updated details from the form
-        name = request.form['name']
-        student_class = request.form['student_class']
-        roll_no = request.form['roll_no']
-        registration_number = request.form['registration_number']
-        father_name = request.form['father_name']
-        mother_name = request.form['mother_name']
-        dob = request.form['dob']
-        email = request.form['email']
-        password = request.form['password']
+        try:
+            # Get updated details from the form
+            name = request.form['name']
+            student_class = request.form['student_class']
+            roll_no = request.form['roll_no']
+            registration_number = request.form['registration_number']
+            father_name = request.form['father_name']
+            mother_name = request.form['mother_name']
+            dob = request.form['dob']
+            email = request.form['email']
+            password = request.form['password']
 
-        # Check if a new profile photo is uploaded
-        profile_photo = request.files.get('profile_photo')
-        if profile_photo and allowed_file(profile_photo.filename):
-            filename = secure_filename(profile_photo.filename)
-            profile_photo.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # Check if a new profile photo is uploaded
+            profile_photo = request.files.get('profile_photo')
+            filename = None
+            if profile_photo and allowed_file(profile_photo.filename):
+                filename = secure_filename(profile_photo.filename)
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                profile_photo.save(file_path)
+                print("File saved at:", file_path)
 
-            # Update the student with the new photo
-            cursor.execute("""
-                UPDATE students
-                SET name = %s, class = %s, roll_no = %s, registration_number = %s,
-                    father_name = %s, mother_name = %s, dob = %s, email = %s, profile_photo = %s
-                WHERE id = %s
-            """, (name, student_class, roll_no, registration_number, father_name, mother_name, dob, email, filename, id))
-        else:
-            # Update the student without changing the photo
-            cursor.execute("""
-                UPDATE students
-                SET name = %s, class = %s, roll_no = %s, registration_number = %s,
-                    father_name = %s, mother_name = %s, dob = %s, email = %s, password = %s
-                WHERE id = %s
-            """, (name, student_class, roll_no, registration_number, father_name, mother_name, dob, email, password, id))
+                # Update the student with the new photo
+                cursor.execute("""
+                    UPDATE students
+                    SET name = %s, class = %s, roll_no = %s, registration_number = %s,
+                        father_name = %s, mother_name = %s, dob = %s, email = %s, profile_photo = %s
+                    WHERE id = %s
+                """, (name, student_class, roll_no, registration_number, father_name, mother_name, dob, email, filename, id))
+            else:
+                # Update the student without changing the photo
+                cursor.execute("""
+                    UPDATE students
+                    SET name = %s, class = %s, roll_no = %s, registration_number = %s,
+                        father_name = %s, mother_name = %s, dob = %s, email = %s, password = %s
+                    WHERE id = %s
+                """, (name, student_class, roll_no, registration_number, father_name, mother_name, dob, email, password, id))
 
-        conn.commit()
-        flash('Student details updated successfully.', 'success')
+            conn.commit()
+            flash('Student details updated successfully.', 'success')
+        except Exception as e:
+            print("Error during Edit Student:", e)
+            flash("An error occurred while editing the student. Please try again.", "danger")
+        finally:
+            cursor.close()
+            conn.close()
+
         return redirect(url_for('student_profile'))
 
     # Fetch the student details for the modal
@@ -699,7 +710,6 @@ def edit_student(id):
     conn.close()
 
     return jsonify(student)
-
 
 
 
