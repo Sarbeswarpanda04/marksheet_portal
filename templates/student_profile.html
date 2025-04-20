@@ -459,10 +459,9 @@
                     
                     <button type="button" class="edit-btn" data-id="{{ student.id }}">Edit</button>
                     
-                    <from method="POST" action="{{ url_for('student_detail', student_id=student.id) }}">
-                        <input type="hidden" name="id" value="{{ student.id }}">
-                        <button type="submit">View</button>
-                    </from>
+                    <form method="GET" action="{{ url_for('student_detail', student_id=student.id) }}">
+                        <button type="submit" class="view-btn">View</button>
+                    </form>
                 </td>
             </tr>
             {% endfor %}

@@ -150,12 +150,11 @@
             <ul>
                 <li><a href="#"><i class="fas fa-users"></i> Student's Profile</a></li>
                 <li><a href="{{ url_for('subject_class_management') }}"><i class="fas fa-book"></i> Subject & Class Management</a></li>
-                <li><a href="#"><i class="fas fa-chart-line"></i> Marks Management</a></li>
+                <li><a href="{{ url_for('marks_management') }}"><i class="fas fa-chart-line"></i> Marks Management</a></li>
                 <li><a href="#"><i class="fas fa-file-alt"></i> Report Generation</a></li>
-                <li><a href="#"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li>
-                <li><a href="#"><i class="fas fa-bullhorn"></i> Notifications</a></li>
-                <li><a href="#"><i class="fas fa-sliders-h"></i> Settings</a></li>
-            </ul>
+                <li><a href="{{ url_for('exam_grade_setup') }}"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li> 
+                <li><a href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i> Notifications</a></li>  
+                <li><a href="{{ url_for('settings') }}"><i class="fas fa-cogs"></i> Settings</a></li>
         </nav>
     </aside>
 

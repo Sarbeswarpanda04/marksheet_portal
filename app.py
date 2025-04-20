@@ -818,44 +818,477 @@ def delete_subject_class(type, id):
 #     conn.close()
 #     return render_template('edit_student.html', student=student)
 
-@app.route('/student-detail/<int:student_id>')
+
+@app.route('/student-detail/<int:student_id>', methods=['GET'])
 def student_detail(student_id):
     conn = get_db_connection()
-    student = conn.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch student details
+    cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
+    student = cursor.fetchone()
+
+    if not student:
+        flash("Student not found.", "danger")
+        return redirect(url_for('student_profile'))
+
+    # Fetch exam records for the student
+    cursor.execute("""
+        SELECT marks.id, exams.name AS exam_name, subjects.name AS subject_name, marks.marks
+        FROM marks
+        JOIN exams ON marks.exam_id = exams.id
+        JOIN subjects ON marks.subject_id = subjects.id
+        WHERE marks.student_id = %s
+        ORDER BY exams.name, subjects.name
+    """, (student_id,))
+    records = cursor.fetchall()
+
+    # Fetch all exams and subjects for the dropdowns
+    cursor.execute("SELECT id, name FROM exams")
+    exams = cursor.fetchall()
+
+    cursor.execute("SELECT id, name FROM subjects")
+    subjects = cursor.fetchall()
+
+    # Calculate percentage
+    cursor.execute("SELECT AVG(marks) AS percentage FROM marks WHERE student_id = %s", (student_id,))
+    percentage = cursor.fetchone()['percentage'] or 0
+
     conn.close()
-    return render_template('student_detail.html', student=student)
 
+    return render_template(
+        'student_dashboard_admin_side.html',
+        student=student,
+        records=records,
+        percentage=round(percentage, 2),
+        exams=exams,
+        subjects=subjects
+    )
+    
+    
+    
+@app.route('/add-edit-marks', methods=['POST'])
+def add_edit_marks():
+    student_id = request.form['student_id']
+    exam_id = request.form['exam_id']
+    subject_id = request.form['subject_id']
+    marks = request.form['marks']
+    mark_id = request.form.get('mark_id')  # Optional for editing
 
-@app.route('/student/<int:id>', methods=['GET', 'POST'])
-def view_individual_student(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Get student info
-    cursor.execute("SELECT * FROM students WHERE id = ?", (id,))
+    if mark_id:  # Edit marks
+        cursor.execute("""
+            UPDATE marks
+            SET exam_id = %s, subject_id = %s, marks = %s
+            WHERE id = %s
+        """, (exam_id, subject_id, marks, mark_id))
+    else:  # Add marks
+        cursor.execute("""
+            INSERT INTO marks (student_id, exam_id, subject_id, marks)
+            VALUES (%s, %s, %s, %s)
+        """, (student_id, exam_id, subject_id, marks))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Marks saved successfully!', 'success')
+    return redirect(url_for('student_detail', student_id=student_id))
+
+
+@app.route('/delete-mark/<int:mark_id>', methods=['GET'])
+def delete_mark(mark_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM marks WHERE id = %s", (mark_id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash('Mark deleted successfully!', 'success')
+    return redirect(request.referrer)
+
+
+@app.route('/generate-marksheet/<int:student_id>', methods=['GET'])
+def generate_marksheet(student_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch student details
+    cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
     student = cursor.fetchone()
 
-    # Get exam records for the student
+    # Fetch exam records
     cursor.execute("""
         SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks
         FROM marks
         JOIN exams ON marks.exam_id = exams.id
         JOIN subjects ON marks.subject_id = subjects.id
-        WHERE marks.student_id = ?
-        ORDER BY exams.name, subjects.name
-    """, (id,))
+        WHERE marks.student_id = %s
+    """, (student_id,))
     records = cursor.fetchall()
-
-    # Get percentage (simplified logic)
-    cursor.execute("SELECT AVG(marks) FROM marks WHERE student_id = ?", (id,))
-    percentage = cursor.fetchone()[0] or 0
 
     conn.close()
 
-    return render_template("student_dashboard_admin_side.html",
-                           student=student,
-                           records=records,
-                           percentage=round(percentage, 2))
+    # Generate a PDF or render a marksheet template
+    return render_template('marksheet.html', student=student, records=records)
+
+
+@app.route('/marks-management', methods=['GET', 'POST'])
+def marks_management():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch all marks with student, exam, and subject details
+    cursor.execute("""
+        SELECT marks.id, students.name AS student_name, exams.name AS exam_name, 
+               subjects.name AS subject_name, marks.marks, marks.student_id, 
+               marks.exam_id, marks.subject_id
+        FROM marks
+        JOIN students ON marks.student_id = students.id
+        JOIN exams ON marks.exam_id = exams.id
+        JOIN subjects ON marks.subject_id = subjects.id
+        ORDER BY students.name, exams.name, subjects.name
+    """)
+    marks = cursor.fetchall()
+
+    # Fetch all students, exams, and subjects for dropdowns
+    cursor.execute("SELECT id, name FROM students")
+    students = cursor.fetchall()
+
+    cursor.execute("SELECT id, name FROM exams")
+    exams = cursor.fetchall()
+
+    cursor.execute("SELECT id, name FROM subjects")
+    subjects = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'marks_management.html',
+        marks=marks,
+        students=students,
+        exams=exams,
+        subjects=subjects
+    )
+
+
+@app.route('/exam-grade-setup', methods=['GET', 'POST'])
+def exam_grade_setup():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch all exams
+    cursor.execute("SELECT * FROM exams ORDER BY id DESC")
+    exams = cursor.fetchall()
+
+    # Fetch all grade thresholds
+    cursor.execute("SELECT * FROM grades ORDER BY min_marks DESC")
+    grades = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'exam_grade_setup.html',
+        exams=exams,
+        grades=grades
+    )
+
+
+@app.route('/add-edit-exam', methods=['POST'])
+def add_edit_exam():
+    exam_id = request.form.get('exam_id')
+    name = request.form['name']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if exam_id:  # Edit exam
+        cursor.execute("UPDATE exams SET name = %s WHERE id = %s", (name, exam_id))
+    else:  # Add exam
+        cursor.execute("INSERT INTO exams (name) VALUES (%s)", (name,))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Exam saved successfully!', 'success')
+    return redirect(url_for('exam_grade_setup'))
+
+@app.route('/delete-exam/<int:exam_id>', methods=['GET'])
+def delete_exam(exam_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM exams WHERE id = %s", (exam_id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash('Exam deleted successfully!', 'success')
+    return redirect(url_for('exam_grade_setup'))
+
+
+@app.route('/add-edit-grade', methods=['POST'])
+def add_edit_grade():
+    grade_id = request.form.get('grade_id')
+    grade = request.form['grade']
+    min_marks = request.form['min_marks']
+    max_marks = request.form['max_marks']
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if grade_id:  # Edit grade
+        cursor.execute("""
+            UPDATE grades
+            SET grade = %s, min_marks = %s, max_marks = %s
+            WHERE id = %s
+        """, (grade, min_marks, max_marks, grade_id))
+    else:  # Add grade
+        cursor.execute("""
+            INSERT INTO grades (grade, min_marks, max_marks)
+            VALUES (%s, %s, %s)
+        """, (grade, min_marks, max_marks))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    flash('Grade saved successfully!', 'success')
+    return redirect(url_for('exam_grade_setup'))
+
+
+
+@app.route('/delete-grade/<int:grade_id>', methods=['GET'])
+def delete_grade(grade_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM grades WHERE id = %s", (grade_id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash('Grade deleted successfully!', 'success')
+    return redirect(url_for('exam_grade_setup'))
+
+
+
+@app.route('/notifications', methods=['GET', 'POST'])
+def notifications():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        # Add a new notification
+        title = request.form['title']
+        message = request.form['message']
+        audience = request.form['audience']
+
+        cursor.execute("""
+            INSERT INTO notifications (title, message, audience)
+            VALUES (%s, %s, %s)
+        """, (title, message, audience))
+        conn.commit()
+        
+        
+        # Send email notifications if applicable
+        if audience in ['all', 'students']:
+            cursor.execute("SELECT email FROM students")
+            recipients = [row['email'] for row in cursor.fetchall()]
+        elif audience == 'admins':
+            cursor.execute("SELECT email FROM admins")
+            recipients = [row['email'] for row in cursor.fetchall()]
+
+        if recipients:
+            msg = Message(
+                subject=f"New Notification: {title}",
+                sender='your-email@gmail.com',
+                recipients=recipients,
+                body=message
+            )
+            mail.send(msg)
+
+        flash('Notification added successfully!', 'success')
+        return redirect(url_for('notifications'))
+        
+
+    # Handle search, filter, and pagination
+    search_query = request.args.get('search', '')
+    audience_filter = request.args.get('audience', 'all')
+    page = int(request.args.get('page', 1))
+    per_page = 5
+    offset = (page - 1) * per_page
+
+    query = "SELECT * FROM notifications WHERE 1=1"
+    params = []
+
+    if search_query:
+        query += " AND title LIKE %s"
+        params.append(f"%{search_query}%")
+
+    if audience_filter != 'all':
+        query += " AND audience = %s"
+        params.append(audience_filter)
+
+    query += " ORDER BY created_at DESC LIMIT %s OFFSET %s"
+    params.extend([per_page, offset])
+
+    cursor.execute(query, params)
+    notifications = cursor.fetchall()
+
+    # Get total count for pagination
+    count_query = "SELECT COUNT(*) AS total FROM notifications WHERE 1=1"
+    count_params = []
+
+    if search_query:
+        count_query += " AND title LIKE %s"
+        count_params.append(f"%{search_query}%")
+
+    if audience_filter != 'all':
+        count_query += " AND audience = %s"
+        count_params.append(audience_filter)
+
+    cursor.execute(count_query, count_params)
+    total_notifications = cursor.fetchone()['total']
+    total_pages = (total_notifications + per_page - 1) // per_page
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        'notifications.html',
+        notifications=notifications,
+        search_query=search_query,
+        audience_filter=audience_filter,
+        page=page,
+        total_pages=total_pages
+    )
+
+
+
+@app.route('/delete-notification/<int:id>', methods=['POST'])
+def delete_notification(id):
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM notifications WHERE id = %s", (id,))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+
+    flash('Notification deleted successfully!', 'success')
+    return redirect(url_for('notifications'))
+
+
+@app.route('/student-notifications')
+def student_notifications():
+    # Ensure the student is logged in
+    if 'student_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch notifications for students or all audiences
+    cursor.execute("""
+        SELECT * FROM notifications
+        WHERE audience = 'all' OR audience = 'students'
+        ORDER BY created_at DESC
+    """)
+    notifications = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('student_notifications.html', notifications=notifications)
+
+
+
+@app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    # Ensure the admin is logged in
+    if 'admin_id' not in session:
+        flash('Please log in to access this feature.', 'danger')
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    if request.method == 'POST':
+        # Handle profile update
+        if 'update_profile' in request.form:
+            name = request.form['name']
+            email = request.form['email']
+            profile_photo = request.files['profile_photo']
+
+            # Save profile photo if uploaded
+            if profile_photo:
+                photo_filename = f"admin_{session['admin_id']}.jpg"
+                profile_photo.save(f"static/images/admin_photos/{photo_filename}")
+                cursor.execute("UPDATE admin SET profile_photo = %s WHERE admin_id = %s", (photo_filename, session['admin_id']))
+
+            # Update name and email
+            cursor.execute("UPDATE admin SET name = %s, email = %s WHERE admin_id = %s", (name, email, session['admin_id']))
+            conn.commit()
+            flash('Profile updated successfully!', 'success')
+
+        # Handle password change
+        elif 'change_password' in request.form:
+            current_password = request.form['current_password']
+            new_password = request.form['new_password']
+            confirm_password = request.form['confirm_password']
+
+            # Verify current password
+            cursor.execute("SELECT password FROM admin WHERE admin_id = %s", (session['admin_id'],))
+            admin = cursor.fetchone()
+            if admin['password'] != current_password:
+                flash('Current password is incorrect!', 'danger')
+            elif new_password != confirm_password:
+                flash('New passwords do not match!', 'danger')
+            else:
+                # Update password
+                cursor.execute("UPDATE admin SET password = %s WHERE admin_id = %s", (new_password, session['admin_id']))
+                conn.commit()
+                flash('Password changed successfully!', 'success')
+
+    # Fetch admin details for the settings page
+    cursor.execute("SELECT * FROM admin WHERE admin_id = %s", (session['admin_id'],))
+    admin = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('settings.html', admin=admin)
 
 
 

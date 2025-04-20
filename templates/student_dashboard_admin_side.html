@@ -5,7 +5,7 @@
     <title>{{ student.name }}'s Dashboard</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             margin: 20px;
         }
 
@@ -57,16 +57,133 @@
         .delete-btn {
             background-color: #f44336;
         }
+
+
+        
+        #marksModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        #marksModal h3 {
+            margin-top: 0;
+        }
+
+        #marksModal form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #marksModal label {
+            margin: 5px 0;
+        }
+
+        #marksModal input, #marksModal select {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #marksModal button {
+            margin: 5px 0;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #marksModal button[type="button"] {
+            background-color: #f44336;
+        }
+
+        #marksModal button[type="button"]:hover {
+            background-color: #d32f2f;
+        }
+
+        #marksModal button[type="submit"] {
+            background-color: #4CAF50;
+        }
+
+        #marksModal button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .edit-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .delete-btn:active {
+            background-color: #c62828;
+        }
+
+        .delete-btn:focus {
+            outline: none;
+        }
+
+        .delete-btn:focus-visible {
+            outline: 2px solid #f44336;
+            outline-offset: 2px;
+        }
+
+        .delete-btn:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+
+        
     </style>
 </head>
 <body>
-    <h2>Welcome {{ student.name }}'s Dashboard</h2>
+    <h2>{{ student.name }}'s Dashboard</h2>
 
+    <h3>Student Information</h3>
+    
     <div class="info-box">
+      <!-- Displaying student profile photo -->
+      {% if student.profile_photo %}
+      <img src="{{ url_for('static', filename='images/student_photos/' ~ student.profile_photo) }}" 
+           alt="Profile Photo" 
+           style="width: 100px; height: 100px; border-radius: 50%;">
+      {% else %}
+        <p>No Profile Photo Available</p>
+      {% endif %}
+        <p><strong>Name:</strong> {{ student.name }}</p>
         <p><strong>Class:</strong> {{ student.class }}</p>
         <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
-        <p><strong>Reg No:</strong> {{ student.registration_no }}</p>
-        <p><strong>DOB:</strong> {{ student.dob }}</p>
+        <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+        <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
         <p><strong>Father's Name:</strong> {{ student.father_name }}</p>
         <p><strong>Mother's Name:</strong> {{ student.mother_name }}</p>
     </div>
@@ -89,8 +206,8 @@
             <td>{{ row.subject_name }}</td>
             <td>{{ row.marks }}</td>
             <td>
-                <a href="#">✏️ Edit</a> |
-                <a href="#" class="delete-btn">🗑️ Delete</a>
+                <button class="edit-btn" data-id="{{ row.id }}" data-exam="{{ row.exam_name }}" data-subject="{{ row.subject_name }}" data-marks="{{ row.marks }}">✏️ Edit</button>
+                <a href="/delete-mark/{{ row.id }}" class="delete-btn">🗑️ Delete</a>
             </td>
         </tr>
         {% endfor %}
@@ -98,10 +215,74 @@
     {% else %}
         <p style="text-align:center;">No marks added yet.</p>
     {% endif %}
+    <div class="actions">
+        <button id="addMarksBtn">➕ Add Marks</button>
+    </div>
 
     <div class="actions">
         <a href="/generate-marksheet/{{ student.id }}">📄 Download Marksheet</a>
         <a href="/student-profile">🔙 Back to Students</a>
     </div>
+
+
+
+    <div id="marksModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border:1px solid #ccc; border-radius:8px; z-index:1000;">
+        <h3 id="marksModalTitle">Add Marks</h3>
+        <form id="marksForm" method="POST" action="/add-edit-marks">
+            <input type="hidden" name="student_id" value="{{ student.id }}">
+            <input type="hidden" name="mark_id" id="markId">
+            <label for="exam">Exam:</label>
+            <select name="exam_id" id="exam" required>
+                {% for exam in exams %}
+                <option value="{{ exam.id }}">{{ exam.name }}</option>
+                {% endfor %}
+            </select><br>
+            <label for="subject">Subject:</label>
+            <select name="subject_id" id="subject" required>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                {% endfor %}
+            </select><br>
+            <label for="marks">Marks:</label>
+            <input type="number" name="marks" id="marks" required><br>
+            <button type="submit">Save</button>
+            <button type="button" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+
+
+    <script>
+        const marksModal = document.getElementById('marksModal');
+        const marksForm = document.getElementById('marksForm');
+        const marksModalTitle = document.getElementById('marksModalTitle');
+    
+        document.getElementById('addMarksBtn').addEventListener('click', () => {
+            marksForm.reset();
+            marksModalTitle.textContent = 'Add Marks';
+            marksModal.style.display = 'block';
+        });
+    
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = btn.getAttribute('data-id');
+                const exam = btn.getAttribute('data-exam');
+                const subject = btn.getAttribute('data-subject');
+                const marks = btn.getAttribute('data-marks');
+    
+                document.getElementById('markId').value = id;
+                document.getElementById('exam').value = exam;
+                document.getElementById('subject').value = subject;
+                document.getElementById('marks').value = marks;
+    
+                marksModalTitle.textContent = 'Edit Marks';
+                marksModal.style.display = 'block';
+            });
+        });
+    
+        function closeModal() {
+            marksModal.style.display = 'none';
+        }
+    </script>
 </body>
 </html>

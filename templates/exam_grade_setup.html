@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam & Grade Setup</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 20px;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .modal form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal label {
+            margin: 5px 0;
+        }
+
+        .modal input, .modal select {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .modal button {
+            margin: 5px 0;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .modal button[type="button"] {
+            background-color: #f44336;
+        }
+
+        .modal button[type="button"]:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h2>Exam & Grade Setup</h2>
+
+    <h3>Manage Exams</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Exam Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+            <tr>
+                <td>{{ exam.name }}</td>
+                <td>
+                    <button class="edit-exam-btn btn btn-primary btn-sm" data-id="{{ exam.id }}" data-name="{{ exam.name }}">Edit</button>
+                    <a href="/delete-exam/{{ exam.id }}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button id="addExamBtn" class="btn btn-success">Add Exam</button>
+
+    <h3 class="mt-5">Manage Grades</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Grade</th>
+                <th>Min Marks</th>
+                <th>Max Marks</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ grade.grade }}</td>
+                <td>{{ grade.min_marks }}</td>
+                <td>{{ grade.max_marks }}</td>
+                <td>
+                    <button class="edit-grade-btn btn btn-primary btn-sm" data-id="{{ grade.id }}" data-grade="{{ grade.grade }}" data-min="{{ grade.min_marks }}" data-max="{{ grade.max_marks }}">Edit</button>
+                    <a href="/delete-grade/{{ grade.id }}" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button id="addGradeBtn" class="btn btn-success">Add Grade</button>
+
+    <!-- Modals -->
+    <div id="examModal" class="modal">
+        <h3 id="examModalTitle">Add Exam</h3>
+        <form id="examForm" method="POST" action="/add-edit-exam">
+            <input type="hidden" name="exam_id" id="examId">
+            <label for="examName">Exam Name:</label>
+            <input type="text" name="name" id="examName" required>
+            <button type="submit">Save</button>
+            <button type="button" onclick="closeExamModal()">Cancel</button>
+        </form>
+    </div>
+
+    <div id="gradeModal" class="modal">
+        <h3 id="gradeModalTitle">Add Grade</h3>
+        <form id="gradeForm" method="POST" action="/add-edit-grade">
+            <input type="hidden" name="grade_id" id="gradeId">
+            <label for="grade">Grade:</label>
+            <input type="text" name="grade" id="grade" required>
+            <label for="minMarks">Min Marks:</label>
+            <input type="number" name="min_marks" id="minMarks" required>
+            <label for="maxMarks">Max Marks:</label>
+            <input type="number" name="max_marks" id="maxMarks" required>
+            <button type="submit">Save</button>
+            <button type="button" onclick="closeGradeModal()">Cancel</button>
+        </form>
+    </div>
+
+    <script>
+        const examModal = document.getElementById('examModal');
+        const gradeModal = document.getElementById('gradeModal');
+        const examForm = document.getElementById('examForm');
+        const gradeForm = document.getElementById('gradeForm');
+
+        document.getElementById('addExamBtn').addEventListener('click', () => {
+            examForm.reset();
+            document.getElementById('examModalTitle').textContent = 'Add Exam';
+            examModal.style.display = 'block';
+        });
+
+        document.querySelectorAll('.edit-exam-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = btn.getAttribute('data-id');
+                const name = btn.getAttribute('data-name');
+
+                document.getElementById('examId').value = id;
+                document.getElementById('examName').value = name;
+
+                document.getElementById('examModalTitle').textContent = 'Edit Exam';
+                examModal.style.display = 'block';
+            });
+        });
+
+        document.getElementById('addGradeBtn').addEventListener('click', () => {
+            gradeForm.reset();
+            document.getElementById('gradeModalTitle').textContent = 'Add Grade';
+            gradeModal.style.display = 'block';
+        });
+
+        document.querySelectorAll('.edit-grade-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const id = btn.getAttribute('data-id');
+                const grade = btn.getAttribute('data-grade');
+                const min = btn.getAttribute('data-min');
+                const max = btn.getAttribute('data-max');
+
+                document.getElementById('gradeId').value = id;
+                document.getElementById('grade').value = grade;
+                document.getElementById('minMarks').value = min;
+                document.getElementById('maxMarks').value = max;
+
+                document.getElementById('gradeModalTitle').textContent = 'Edit Grade';
+                gradeModal.style.display = 'block';
+            });
+        });
+
+        function closeExamModal() {
+            examModal.style.display = 'none';
+        }
+
+        function closeGradeModal() {
+            gradeModal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
