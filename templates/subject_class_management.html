@@ -9,6 +9,129 @@
 
 
 <body>
+
+    <style>
+        body {
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        
+        h2, h4 {
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #2d3a8c;
+            text-shadow: 0 2px 12px #8e54e933;
+            animation: fadeInDown 0.7s;
+        }
+        
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        
+        .table {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+            margin-bottom: 32px;
+            animation: fadeIn 1s;
+        }
+        
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        th {
+            background: linear-gradient(90deg, #4f8cff 60%, #8e54e9 100%);
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.08rem;
+            border: none;
+            letter-spacing: 0.5px;
+        }
+        
+        tbody tr {
+            transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+        }
+        tbody tr:hover {
+            background: linear-gradient(90deg, #e3f0ff 60%, #f3e9ff 100%);
+            transform: scale(1.012);
+            box-shadow: 0 4px 18px #4f8cff22;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, #2196F3 60%, #6dd5ed 100%);
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #1976D2 60%, #2196F3 100%);
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 4px 18px #2196F344;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(90deg, #f7971e 60%, #ffd200 100%);
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(90deg, #ffd200 60%, #f7971e 100%);
+            color: #fff;
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 4px 18px #ffd20044;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, #f85032 60%, #e73827 100%);
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(90deg, #b31217 60%, #e52d27 100%);
+            color: #fff;
+            transform: translateY(-2px) scale(1.06);
+            box-shadow: 0 4px 18px #f8503244;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1.5px solid #8e54e9;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: rgba(255,255,255,0.95);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4f8cff;
+            box-shadow: 0 0 8px #8e54e9aa;
+            outline: none;
+        }
+        
+        @media (max-width: 900px) {
+            .table { font-size: 0.95rem; }
+        }
+        @media (max-width: 600px) {
+            th, td { font-size: 0.95rem; padding: 8px 4px; }
+        }
+
+        </style>
+
+
+
+
     <div class="container mt-5">
         <h2 class="mb-4 text-center">Subject & Class Management</h2>
 

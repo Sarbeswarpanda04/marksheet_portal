@@ -5,9 +5,16 @@ from flask_mail import Mail, Message
 import random
 import re
 import smtplib
+import datetime
+from datetime import timedelta
 
 app = Flask(__name__)
-app.secret_key = 'S@rb3sw@r_OTP_Se$$ion_Key_123!'  # Replace with a strong secret key
+app.secret_key = 'S@rb3sw@r_OTP_Se$$ion_Key_123!'  # Replace with a strong secret 
+
+
+
+app.permanent_session_lifetime = timedelta(days=2)
+
 
 # Flask-Mail Configuration
 app.config.update(
@@ -105,6 +112,15 @@ def login():
                 session['admin_id'] = user['admin_id']  # Store admin_id for admin users
             elif user_type == 'student':
                 session['student_id'] = user['id']  # Store student_id for student users
+                
+                
+            # --- Remember Me logic START ---
+            if 'remember_me' in request.form:
+                session.permanent = True  # Session will use app.permanent_session_lifetime
+            else:
+                session.permanent = False
+            # --- Remember Me logic END ---
+
             
 
             otp = str(random.randint(100000, 999999))
@@ -242,6 +258,57 @@ def verify_otp():
             return redirect(url_for('verify_otp'))
 
     return render_template('verify_otp.html')
+
+
+@app.route('/resend_otp')
+def resend_otp():
+    # Only allow if user is in session
+    if 'email' not in session or 'username' not in session:
+        flash('Session expired. Please login again.', 'danger')
+        return redirect(url_for('login'))
+
+    otp = str(random.randint(100000, 999999))
+    session['otp'] = otp
+
+    try:
+        msg = Message('Your OTP for Login', sender=app.config['MAIL_USERNAME'], recipients=[session['email']])
+        msg.body = f"Your new OTP is: {otp}"
+        mail.send(msg)
+        flash('A new OTP has been sent to your email.', 'info')
+    except Exception as e:
+        print("❌ Failed to send email:", e)
+        flash('Failed to send OTP. Please try again later.', 'danger')
+
+    return redirect(url_for('verify_otp'))
+
+
+@app.route('/verify_reset_otp', methods=['GET', 'POST'])
+def verify_reset_otp():
+    if request.method == 'POST':
+        entered_otp = request.form.get('otp')
+        if entered_otp == session.get('reset_otp'):
+            flash("OTP verified! Set your new password.", "success")
+            return redirect(url_for('reset_password'))
+        else:
+            flash("Incorrect OTP. Try again.", "danger")
+            return redirect(url_for('verify_reset_otp'))
+    else:
+        # This is your resend OTP logic
+        otp = str(random.randint(100000, 999999))
+        session['reset_otp'] = otp
+        user_email = session.get('reset_email')
+        if user_email:
+            try:
+                msg = Message('Your New OTP', sender=app.config['MAIL_USERNAME'], recipients=[user_email])
+                msg.body = f'Your new OTP is: {otp}'
+                mail.send(msg)
+                flash('A new OTP has been sent to your email.', 'success')
+            except Exception as e:
+                flash('Failed to send OTP. Please try again.', 'danger')
+        else:
+            flash('Session expired. Please login again.', 'danger')
+            return redirect(url_for('login'))
+        return render_template('verify_reset_otp.html')
 
 
 
@@ -504,6 +571,7 @@ def student_profile():
     cursor.execute("SELECT * FROM students ORDER BY id DESC")  # Fetch all students
     students = cursor.fetchall()  # Fetch all students from the database
     conn.close()  
+    students = sorted(students, key=lambda s: int(s['roll_no']))  # Sort students by roll number
     return render_template('student_profile.html', students=students)
 
 import os
@@ -1193,16 +1261,102 @@ def notifications():
             cursor.execute("SELECT email FROM students")
             recipients = [row['email'] for row in cursor.fetchall()]
         elif audience == 'admins':
-            cursor.execute("SELECT email FROM admins")
+            cursor.execute("SELECT email FROM admin")
             recipients = [row['email'] for row in cursor.fetchall()]
 
         if recipients:
             msg = Message(
                 subject=f"New Notification: {title}",
-                sender='your-email@gmail.com',
+                sender=app.config['MAIL_USERNAME'],
                 recipients=recipients,
-                body=message
-            )
+            )   
+            msg.html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>New Notification - Marksheet Portal</title>
+                <style>
+                    body {{
+                        background: #f4f6fb;
+                        font-family: 'Segoe UI', Arial, sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }}
+                    .email-container {{
+                        max-width: 520px;
+                        margin: 32px auto;
+                        background: #fff;
+                        border-radius: 14px;
+                        box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+                        padding: 32px 24px;
+                        color: #222;
+                    }}
+                    .header {{
+                        text-align: center;
+                        margin-bottom: 18px;
+                    }}
+                    .header img {{
+                        width: 100px;
+                        margin-bottom: 8px;
+                        
+                    }}
+                    .notif-title {{
+                        color: #2d6cdf;
+                        font-size: 1.3em;
+                        font-weight: bold;
+                        margin-bottom: 10px;
+                    }}
+                    .notif-message {{
+                        background: #f0fdfa;
+                        border-left: 4px solid #2d6cdf;
+                        padding: 16px 18px;
+                        border-radius: 8px;
+                        margin-bottom: 18px;
+                        font-size: 1.08em;
+                    }}
+                    .details {{
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        padding: 12px 18px;
+                        margin-bottom: 18px;
+                        font-size: 1em;
+                    }}
+                    .details strong {{
+                        color: #2d6cdf;
+                    }}
+                    .footer {{
+                        text-align: center;
+                        color: #888;
+                        font-size: 0.95em;
+                        margin-top: 24px;
+                    }}
+                    @media (max-width: 600px) {{
+                        .email-container {{ padding: 12px 4px; }}
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="email-container">
+                    <div class="header">
+                        <img src='https://png.pngtree.com/png-vector/20230107/ourmid/pngtree-new-update-banner-label-notification-template-png-image_6554704.png' alt="Portal Logo">
+                        <h2>Marksheet Management Portal</h2>
+                    </div>
+                    <div class="notif-title">{title}</div>
+                    <div class="notif-message">{message}</div>
+                    <div class="details">
+                        <div><strong>Audience:</strong> {audience.capitalize()}</div>
+                        <div><strong>Date & Time:</strong> {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</div>
+                    </div>
+                    <div class="footer">
+                        &copy; 2025 Marksheet Management Portal<br>
+                        <span style="color:#2d6cdf;">This is an automated message. Please do not reply.</span>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+                        
             mail.send(msg)
 
         flash('Notification added successfully!', 'success')
@@ -1506,17 +1660,17 @@ def forgot_password():
 
 
 
-@app.route('/verify_reset_otp', methods=['GET', 'POST'])
-def verify_reset_otp():
-    if request.method == 'POST':
-        entered_otp = request.form.get('otp')
-        if entered_otp == session.get('reset_otp'):
-            flash("OTP verified! Set your new password.", "success")
-            return redirect(url_for('reset_password'))
-        else:
-            flash("Incorrect OTP. Try again.", "danger")
-            return redirect(url_for('verify_reset_otp'))
-    return render_template('verify_reset_otp.html')
+# @app.route('/verify_reset_otp', methods=['GET', 'POST'])
+# def verify_reset_otp():
+#     if request.method == 'POST':
+#         entered_otp = request.form.get('otp')
+#         if entered_otp == session.get('reset_otp'):
+#             flash("OTP verified! Set your new password.", "success")
+#             return redirect(url_for('reset_password'))
+#         else:
+#             flash("Incorrect OTP. Try again.", "danger")
+#             return redirect(url_for('verify_reset_otp'))
+#     return render_template('verify_reset_otp.html')
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
@@ -1694,5 +1848,10 @@ def logout():
 #     app.run(debug=True)
 
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=False)

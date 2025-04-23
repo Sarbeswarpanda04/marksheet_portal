@@ -23,7 +23,27 @@ this details will directly fetch from students databases -->
         </div>
         {% endfor %}
     </div>
+
 </section>
+
+
+<section class="top-students">
+    <h2>📊 Recent Results</h2>
+    <div class="results-banner">
+        {% for result in recent_results %}
+        <div class="result-card">
+            <h3>{{ result.subject }}</h3>
+            <p><strong>Marks Obtained:</strong> {{ result.marks_obtained }}</p>
+            <p><strong>Total Marks:</strong> {{ result.total_marks }}</p>
+            <p><strong>Date:</strong> {{ result.date }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+
+
+
 
 
 <section class="contact-form">

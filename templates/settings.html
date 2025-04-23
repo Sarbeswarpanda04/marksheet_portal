@@ -6,8 +6,146 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+    <style>
+        /* Body background with gradient */
+body {
+    background: linear-gradient(120deg, #e0e7ff 0%, #f0fdfa 100%);
+    min-height: 100vh;
+}
+
+/* Main container as a card with shadow and animation */
+.container {
+    background: rgba(255,255,255,0.93);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
+    padding: 40px 32px 32px 32px;
+    margin-top: 48px !important;
+    margin-bottom: 48px;
+    animation: fadeIn 1s;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    border: 1px solid #e0e7ff;
+    transition: box-shadow 0.3s, transform 0.3s;
+
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Section headings */
+h2{
+    color: #2d6cdf;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+}
+
+h3 {
+    color:rgb(0, 1, 2);
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+hr {
+    border-top: 2px solid #e0e7ff;
+    margin: 32px 0;
+}
+
+/* Flash messages with animation */
+.alert {
+    animation: slideDown 0.6s;
+    border-radius: 8px;
+    font-size: 1em;
+    margin-bottom: 18px;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Form labels and inputs */
+.form-label {
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.5px;
+}
+
+.form-control, .form-select {
+    border-radius: 6px;
+    border: 1.5px solid #c7d2fe;
+    background: #f8fafc;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-size: 1em;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    background: #fff;
+    animation: inputFocus 0.4s;
+}
+
+@keyframes inputFocus {
+    from { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);}
+    to { box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);}
+}
+
+/* Profile photo preview */
+img[alt="Profile Photo"] {
+    border-radius: 50%;
+    border: 2px solid #2d6cdf;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.10);
+    margin-top: 8px;
+    transition: transform 0.3s;
+}
+img[alt="Profile Photo"]:hover {
+    transform: scale(1.08) rotate(-2deg);
+}
+
+/* Buttons with gradient and animation */
+.btn-primary {
+    background: linear-gradient(90deg, #2d6cdf 60%, #38bdf8 100%);
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    padding: 12px 0;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background: linear-gradient(90deg, #38bdf8 60%, #2d6cdf 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 6px 18px rgba(44, 62, 80, 0.13);
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .container {
+        padding: 18px 6px 18px 6px;
+        max-width: 98vw;
+    }
+    h2, h3 {
+        font-size: 1.2em;
+    }
+}
+        </style>
+    
+
+
+
+
     <div class="container mt-5">
-        <h2>Settings</h2>
+        <h3>Settings</h3>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -19,7 +157,7 @@
         {% endwith %}
 
         <!-- Profile Update Section -->
-        <h3>Update Profile</h3>
+        <h2>Update Profile</h2>
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="update_profile" value="1">
             <div class="mb-3">
@@ -43,7 +181,7 @@
         <hr>
 
         <!-- Password Change Section -->
-        <h3>Change Password</h3>
+        <h2>Change Password</h2>
         <form method="POST">
             <input type="hidden" name="change_password" value="1">
             <div class="mb-3">
@@ -64,7 +202,7 @@
         <hr>
 
         <!-- Application Configuration Section -->
-        <h3>Application Settings</h3>
+        <h2>Application Settings</h2>
         <form method="POST">
             <div class="mb-3">
                 <label for="theme" class="form-label">Theme</label>

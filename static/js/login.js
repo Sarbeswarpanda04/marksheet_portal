@@ -5,11 +5,6 @@ const loginForm = document.getElementById('loginForm');
 const toggleBtns = document.querySelectorAll('.toggle-btn');
 const formHeader = document.querySelector('.form-header');
 const userIdentifier = document.getElementById('userIdentifier');
-const userPassword = document.getElementById('userPassword');
-const passwordToggle = document.querySelector('.password-toggle');
-const languageSelect = document.getElementById('languageSelect');
-const rememberMeCheckbox = document.getElementById('rememberMe');
-const socialButtons = document.querySelectorAll('.social-btn');
 const particles = document.getElementById('particles');
 
 // Constants
@@ -318,13 +313,7 @@ function toggleTheme() {
     }, 200);
 }
 
-// Password Visibility Toggle
-function togglePasswordVisibility() {
-    const type = userPassword.type === 'password' ? 'text' : 'password';
-    userPassword.type = type;
-    passwordToggle.classList.toggle('fa-eye');
-    passwordToggle.classList.toggle('fa-eye-slash');
-}
+
 
 // Input Animations
 function addInputAnimations() {

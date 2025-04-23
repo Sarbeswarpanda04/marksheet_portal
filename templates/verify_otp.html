@@ -5,8 +5,9 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 <div class="container otp-container">
     <div class="otp-card">
+        <img src="{{ url_for('static', filename='images/otp_mail.png') }}" alt="OTP Sent" class="otp-img mb-3">
         <h2>Verify OTP</h2>
-        <p>An OTP has been sent to your registered email. Please enter it below to verify.</p>
+        <p class="otp-desc">An OTP has been sent to your registered email. Please enter it below to verify.</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -17,54 +18,177 @@
         {% endwith %}
 
         <form method="POST" action="{{ url_for('verify_otp') }}">
-            <input type="text" name="otp_input" placeholder="Enter OTP" required class="otp-input">
-            <button type="submit" class="btn btn-gradient">Verify</button>
+            <input type="text" name="otp_input" placeholder="Enter OTP" required class="otp-input" maxlength="6" autocomplete="one-time-code">
+            <button type="submit" class="btn btn-gradient otp-btn">Verify</button>
         </form>
+        <div class="resend-otp mt-3">
+            <a href="{{ url_for('resend_otp') }}" class="resend-link">Resend OTP</a>        </div>
     </div>
 </div>
 
 <style>
-    .otp-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 70vh;
-    }
+/* Gradient animated background with dark mode support */
+body {
+    background: linear-gradient(135deg, #045dab, #130164, #1e90ff, #6a11cb, #2575fc);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    min-height: 100vh;
+    transition: background 0.4s;
+}
 
+
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+/* Dark mode support */
+/* This will apply a different gradient and brightness filter for dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(135deg,rgb(0, 15, 28), #130164,rgb(0, 42, 84),rgb(64, 0, 133),rgb(0, 45, 123));
+        filter: brightness(0.8);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+}
+
+.otp-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 0;
+}
+
+.otp-card {
+    background: rgba(31, 24, 81, 0.85);
+    padding: 2.5rem 2rem 2rem 2rem;
+    border-radius: 18px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    width: 100%;
+    max-width: 410px;
+    text-align: center;
+    position: relative;
+    transition: box-shadow 0.3s, background 0.3s;
+}
+
+.otp-card:hover {
+    box-shadow: 0 16px 48px rgba(52,152,219,0.22);
+    background: rgba(30, 41, 59, 0.93);
+}
+
+.otp-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 2px 8px #007bff33);
+    animation: float 2.5s ease-in-out infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0);}
+    50% { transform: translateY(-10px);}
+}
+
+.otp-desc {
+    color: #b0b8c1;
+    font-size: 1.05rem;
+    margin-bottom: 1.2rem;
+}
+
+.otp-input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 18px;
+    font-size: 1.15rem;
+    border: 1.5px solid rgb(8, 36, 218);
+    border-radius: 8px;
+    background: rgba(147, 172, 252, 0.23);
+    color: #fff;
+    letter-spacing: 0.2em;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.otp-input:focus {
+    border-color:rgb(106, 0, 255);
+    background: rgba(0, 230, 208, 0.08);
+    box-shadow: 0 0 8px #00e6d088;
+    color: #fff;
+}
+
+.btn-gradient.otp-btn {
+    width: 100%;
+    margin-top: 22px;
+    padding: 12px 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #007bff 60%, #00e6d0 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 12px #00e6d033;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-gradient.otp-btn:hover, .btn-gradient.otp-btn:focus {
+    background: linear-gradient(90deg,rgba(10, 0, 58, 0.21) 60%,rgba(0, 15, 131, 0.23) 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 24px #00e6d055;
+    color: #fff;
+}
+
+.resend-link {
+    padding-top: 12px;
+    font-weight: 500;
+    color: #00e6d0;
+    text-decoration: underline;
+    font-size: 0.98rem;
+    transition: color 0.2s;
+}
+.resend-link:hover {
+    color: #fff;
+    text-shadow: 0 0 8px #00e6d0;
+}
+
+.alert {
+    margin-top: 1.2rem;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: none;
+}
+.alert-success {
+    background: linear-gradient(90deg, #d4edda 60%, #b8f5e5 100%);
+    color: #155724;
+}
+.alert-danger {
+    background: linear-gradient(90deg, #f8d7da 60%, #f5b8c0 100%);
+    color: #721c24;
+}
+
+/* Dark mode for alerts */
+@media (prefers-color-scheme: dark) {
     .otp-card {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 2rem;
-        border-radius: 12px;
-        backdrop-filter: blur(10px);
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        width: 100%;
-        max-width: 400px;
-        text-align: center;
+        background: rgba(30, 41, 59, 0.97);
     }
-
     .otp-input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 15px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
+        background: rgba(255,255,255,0.07);
+        color: #fff;
     }
-
-    .alert {
-        margin-top: 1rem;
-        padding: 10px;
-        border-radius: 4px;
-    }
-
     .alert-success {
-        background-color: #d4edda;
-        color: #155724;
+        background: linear-gradient(90deg, #1b3c2e 60%, #1e4d3a 100%);
+        color: #b8f5e5;
     }
-
     .alert-danger {
-        background-color: #f8d7da;
-        color: #721c24;
+        background: linear-gradient(90deg, #3c1b1b 60%, #4d1e1e 100%);
+        color: #f5b8c0;
     }
+}
 </style>
 {% endblock %}

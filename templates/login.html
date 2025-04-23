@@ -29,7 +29,7 @@
     <div class="glass-overlay"></div>
 
     <!-- Header Section -->
-    <header class="header">
+    <!--<header class="header">
         <div class="logo-container">
             <div class="logo-wrapper">
                 <img src="{{ url_for('static', filename='images/college-logo.png') }}" alt="College Logo" class="college-logo">
@@ -40,7 +40,7 @@
                 <p>Excellence in Education</p>
             </div>
         </div>
-    </header>
+    </header>-->
 
     <!-- Main Content -->
     <main class="main-content">
@@ -92,7 +92,7 @@
                     <div class="form-group">
                         <div class="input-icon">
                             <i class="fas fa-id-card"></i>
-                            <input type="text" name="username" id="userIdentifier" placeholder="Roll Number" required>
+                            <input type="text" name="username" id="userIdentifier" placeholder="Regd. Number" required>
                             <span class="input-focus-effect"></span>
                         </div>
                     </div>
@@ -108,9 +108,7 @@
 
                     <div class="remember-me">
                         <label class="checkbox-container">
-                            <input type="checkbox" id="rememberMe">
-                            <span class="checkmark"></span>
-                            Remember me
+                            <input type="checkbox" id="rememberMe" name="remember_me">                            <span class="checkmark"></span>
                         </label>
                     </div>
 
@@ -158,5 +156,33 @@
             }
         });
     });
+
+
+
+
+
+
+
+
+    // Password Toggle
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('userPassword');
+            const toggleIcon = document.querySelector('.password-toggle');
+        
+            toggleIcon.addEventListener('click', function () {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                }
+            });
+        });
+    
+
+
 </script>
 {% endblock %}
