@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ exam.name }} - Marks Management</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- jQuery (required for Toastr) -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Toastr CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
+        <!-- Toastr JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    </head>
+
+<body>
+
+        <style>
+
+
+        body {
+            background-color: #f8f9fa; /* Light background color */
+            font-family: 'Arial', sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        h2 {
+            color: #343a40; /* Dark text color */
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529; /* Dark text color */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .table th, .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6; /* Light border color */
+        }
+        .table th {
+            background-color: rgba(0, 31, 124, 0.79); /* Light blue background */
+            color:rgb(255, 255, 255); /* Dark text color */
+            font-weight: bold;
+            text-align: center;
+        }
+        .table td {
+            background-color: #ffffff; /* White background for table cells */
+            color: #495057; /* Dark text color */
+        }
+        .table tr:nth-child(even) td {
+            background-color: #f2f2f2; /* Light gray background for even rows */
+        }
+        .table tr:hover td {
+            background-color: #e9ecef; /* Light gray background on hover */
+        }
+        .table th {
+            font-weight: bold;
+            text-align: center;
+        }
+        .table td {
+            text-align: center;
+        }
+        .table th, .table td {
+            padding: 0.75rem;
+        }
+        
+        #toast-container > .toast {
+            background-color:rgb(255, 255, 255) !important;   /* Light background */
+            color:rgb(4, 0, 114) !important;              /* Bootstrap dark text */
+            border-left: 6px solid rgb(3, 198, 19) !important; /* Bootstrap primary */
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 0.5rem;
+            font-family: 'Arial', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            line-height: 1.5;
+
+            font-size: 1.1rem;
+            min-width: 250px;
+        }
+        #toast-container > .toast-success {
+            border-left-color:rgba(0, 255, 21, 0.97) !important;  /* Bootstrap success */
+        }
+        #toast-container > .toast-error {
+            border-left-color: #dc3545 !important;  /* Bootstrap danger */
+        }
+        #toast-container > .toast {
+            opacity: 0.98 !important;
+            z-index: 99999 !important;
+            transition: all 0.5s ease-in-out !important;
+            transform: translateY(0) !important;
+            animation: fadeIn 0.5s ease-in-out !important;
+            animation-fill-mode: forwards !important;
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.9rem; /* Adjust font size for smaller screens */
+            }
+            .container {
+                padding: 1rem;
+            }
+            h2 {
+                font-size: 1.5rem;
+            }
+            .table {
+                font-size: 0.9rem;
+            }
+            .table th, .table td {
+                padding: 0.5rem;
+            }
+            .table th {
+                background-color:rgba(8, 103, 198, 0.43);
+                color: #343a40;
+            }
+            .table td {
+                background-color: #ffffff;
+                color: #495057;
+            }
+            .table tr:nth-child(even) td {
+                background-color: #f2f2f2;
+            }
+            .table tr:hover td {
+                background-color: #e9ecef;
+            }
+            .table th {
+                font-weight: bold;
+                text-align: center;
+            }
+            .table td {
+                text-align: center;
+            }
+            .table th, .table td {
+                padding: 0.75rem;
+            }
+            .table th {
+                background-color: #007bff;
+                color: white;
+            }
+            .table td {
+                background-color: #f8f9fa;
+                color: #212529;
+            }
+
+            .table {
+                border-radius: 0.5rem;
+                overflow: hidden;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            }
+            .table th, .table td {
+                vertical-align: middle;
+            }
+            .btn-success {
+                background-color: #28a745;
+                border-color: #28a745;
+            }
+            .btn-primary {
+                background-color: #007bff;
+                border-color: #007bff;
+            }
+            .btn-success:hover, .btn-primary:hover {
+                opacity: 0.9;
+            }
+            .btn {
+                font-size: 0.9rem;
+                padding: 0.5rem 1rem;
+            }
+            .marks-input {
+                width: 80px;
+                text-align: center;
+            }
+            .marks-input:focus {
+                outline: none;
+                box-shadow: 0 0 5px rgba(0,123,255,0.5);
+            }
+            .update-btn {
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            #updateAllBtn {
+                width: 100%;
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            .update-btn:hover {
+                background-color: #218838;
+                border-color:rgb(0, 121, 207);
+            }
+            #updateAllBtn:hover {
+                background-color: #0056b3;
+                border-color:rgb(247, 255, 4);
+            }
+            .update-btn:focus, #updateAllBtn:focus {
+                outline: none;
+                box-shadow: 0 0 5px rgba(0,123,255,0.5);
+            }
+            .update-btn:active, #updateAllBtn:active {
+                background-color: #0056b3;
+                border-color: #004085;
+            }
+            .update-btn:disabled, #updateAllBtn:disabled {
+                background-color: #6c757d;
+                border-color: #6c757d;
+                cursor: not-allowed;
+            }
+            .update-btn:disabled:hover, #updateAllBtn:disabled:hover {
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+            .update-btn:disabled:focus, #updateAllBtn:disabled:focus {
+                box-shadow: none;
+            }
+            .update-btn:disabled:active, #updateAllBtn:disabled:active {
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+            .update-btn:disabled:active:hover, #updateAllBtn:disabled:active:hover {
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+            
+            }
+        
+        </style>
+
+
+
+
+    <div class="container mt-5">
+        <h2>{{ exam.name }} - Marks Management</h2>
+        <table class="table table-bordered table-responsive"> 
+            <thead>
+                <tr>
+                    <th>Roll No</th>
+                    <th>Registration No</th>
+                    <th>Name</th>
+                    {% for subject in subjects %}
+                    <th>{{ subject.name }}</th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.roll_no }}</td>
+                    <td>{{ student.registration_number }}</td>
+                    <td>{{ student.name }}</td>
+                    {% for subject in subjects %}
+                    <td>
+                        <input type="number" class="form-control marks-input" 
+                               data-student-id="{{ student.id }}" 
+                               data-subject-id="{{ subject.id }}" 
+                               value="{{ marks_data.get((student.id, subject.id), {}).get('marks_obtained', '') | default('0') }}" 
+                               min="0" max="100" oninput="if(this.value === '') this.value = 0;">
+                    </td>
+                    {% endfor %}
+                    <td>
+                        <button class="btn btn-success update-btn" data-student-id="{{ student.id }}">Update</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button id="updateAllBtn" class="btn btn-primary">Update All</button>
+    </div>
+
+    <script>
+        
+        // Validate marks input on change
+document.querySelectorAll('.marks-input').forEach(input => {
+    input.addEventListener('change', function() {
+        let value = parseInt(this.value, 10);
+        if (isNaN(value) || value < 0 || value > 100) {
+            toastr.error('Marks must be a number between 0 and 100.', 'Invalid Input', {
+                positionClass: 'toast-top-right',
+                timeOut: 2000,
+                progressBar: true
+            });
+            this.value = '';
+        }
+    });
+});
+
+// Update Marks for a Single Student
+document.querySelectorAll('.update-btn').forEach(button => {
+    button.addEventListener('click', () => {
+        const studentId = button.getAttribute('data-student-id');
+        const examId = {{ exam.id }};
+        const subjectMarks = [];
+        let hasInvalid = false;
+
+        // Collect marks for all subjects for the student
+        document.querySelectorAll(`.marks-input[data-student-id="${studentId}"]`).forEach(input => {
+            const subjectId = input.getAttribute('data-subject-id');
+            const marks = input.value;
+            // Validate before sending
+            if (marks === '' || isNaN(marks) || marks < 0 || marks > 100) {
+                hasInvalid = true;
+            }
+            subjectMarks.push({ subject_id: subjectId, marks: marks });
+        });
+
+        if (hasInvalid) {
+            toastr.error('Please enter valid marks (0-100) for all subjects before updating.', 'Invalid Input', {
+                positionClass: 'toast-top-right',
+                timeOut: 2000,
+                progressBar: true
+            });
+            return; // Do not send request
+        }
+
+        // Send the data to the backend
+        axios.post('/update-marks', {
+            student_id: studentId,
+            exam_id: examId,
+            subject_marks: subjectMarks
+        }).then(response => {
+            toastr.success(response.data.message, 'Success', {
+                positionClass: 'toast-top-right',
+                timeOut: 3000,
+                progressBar: true
+            });
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }).catch(error => {
+            toastr.error('Failed to update marks.', 'Error', {
+                positionClass: 'toast-top-right',
+                timeOut: 3000,
+                progressBar: true
+            });
+        });
+    });
+});
+
+// Update Marks for All Students
+document.getElementById('updateAllBtn').addEventListener('click', () => {
+    const examId = {{ exam.id }};
+    const allStudentsMarks = [];
+    let hasInvalid = false;
+
+    // Collect marks for all students
+    document.querySelectorAll('tbody tr').forEach(row => {
+        const studentId = row.querySelector('.marks-input').getAttribute('data-student-id');
+        const subjectMarks = [];
+
+        row.querySelectorAll('.marks-input').forEach(input => {
+            const subjectId = input.getAttribute('data-subject-id');
+            const marks = input.value;
+            // Validate before sending
+            if (marks === '' || isNaN(marks) || marks < 0 || marks > 100) {
+                hasInvalid = true;
+            }
+            subjectMarks.push({ subject_id: subjectId, marks: marks });
+        });
+
+        allStudentsMarks.push({ student_id: studentId, subject_marks: subjectMarks });
+    });
+
+    if (hasInvalid) {
+        toastr.error('Please enter valid marks (0-100) for all students before updating.', 'Invalid Input', {
+            positionClass: 'toast-top-right',
+            timeOut: 2000,
+            progressBar: true
+        });
+        return; // Do not send request
+    }
+
+    // Send the data to the backend
+    axios.post('/update-all-marks', {
+        exam_id: examId,
+        all_students_marks: allStudentsMarks
+    }).then(response => {
+        toastr.success(response.data.message, 'Success', {
+            positionClass: 'toast-top-right',
+            timeOut: 3000,
+            progressBar: true
+        });
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+    }).catch(error => {
+        toastr.error('Failed to update all marks.', 'Error', {
+            positionClass: 'toast-top-right',
+            timeOut: 3000,
+            progressBar: true
+        });
+    });
+});
+         
+    </script>
+</body>
+</html>

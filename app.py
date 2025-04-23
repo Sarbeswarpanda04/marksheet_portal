@@ -865,52 +865,170 @@ def student_detail(student_id):
         subjects=subjects
     )
     
+
+
+
+
+
+
+
+
+
+# Secure Admin Access
+@app.before_request
+def require_login():
+    if request.endpoint in ['marks_management', 'exam_marks_management', 'update_marks', 'update_all_marks'] and 'admin_id' not in session:
+        flash('Please log in to access this page.', 'danger')
+        return redirect(url_for('login'))
+
+# Marks Management Page
+@app.route('/marks-management', methods=['GET'])
+def marks_management():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch all exams
+    cursor.execute("SELECT * FROM exams ORDER BY id DESC")
+    exams = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template('marks_management.html', exams=exams)
+
+# Individual Exam Marks Management Page
+@app.route('/exam-marks-management/<int:exam_id>', methods=['GET'])
+def exam_marks_management(exam_id):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # Fetch exam details
+    cursor.execute("SELECT * FROM exams WHERE id = %s", (exam_id,))
+    exam = cursor.fetchone()
+
+    # Fetch all students sorted by roll number
+    cursor.execute("SELECT id, roll_no, registration_number, name FROM students ORDER BY roll_no ASC")
+    students = cursor.fetchall()
+    students = sorted(students, key=lambda s: int(s['roll_no']))
+
+    # Fetch all subjects
+    cursor.execute("SELECT id, name FROM subjects")
+    subjects = cursor.fetchall()
+
+    # Fetch existing marks for the exam
+    cursor.execute("""
+        SELECT marks.student_id, marks.subject_id, marks.marks_obtained, marks.remarks
+        FROM marks
+        WHERE marks.exam_id = %s
+    """, (exam_id,))
+    marks = cursor.fetchall()
+
+    # Organize marks data for easy access
+    marks_data = {}
+    for mark in marks:
+        marks_data[(mark['student_id'], mark['subject_id'])] = {
+            'marks_obtained': mark['marks_obtained'],
+            'remarks': mark['remarks']
+        }
+
+    cursor.close()
+    conn.close()
     
     
-@app.route('/add-edit-marks', methods=['POST'])
-def add_edit_marks():
-    student_id = request.form['student_id']
-    exam_id = request.form['exam_id']
-    subject_id = request.form['subject_id']
-    marks = request.form['marks']
-    mark_id = request.form.get('mark_id')  # Optional for editing
+    # Debugging output
+    print("Subjects:", subjects)
+    print("Marks Data:", marks_data)
+
+    return render_template(
+        'exam_marks_management.html',
+        exam=exam,
+        students=students,
+        subjects=subjects,
+        marks_data=marks_data
+    )
+    
+
+# Update Marks for a Single Student
+@app.route('/update-marks', methods=['POST'])
+def update_marks():
+    data = request.get_json()
+    student_id = data['student_id']
+    exam_id = data['exam_id']
+    subject_marks = data['subject_marks']
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    if mark_id:  # Edit marks
+    for subject_mark in subject_marks:
+        subject_id = subject_mark['subject_id']
+        marks = subject_mark['marks']
+        
+        
+            # Ensure marks is a valid integer and in range 0-100
+        try:
+            marks = int(marks)
+        except (ValueError, TypeError):
+            marks = 0
+        if marks < 0 or marks > 100:
+            marks = 0
+
+        
+
+        # Update or insert marks for the student
         cursor.execute("""
-            UPDATE marks
-            SET exam_id = %s, subject_id = %s, marks = %s
-            WHERE id = %s
-        """, (exam_id, subject_id, marks, mark_id))
-    else:  # Add marks
-        cursor.execute("""
-            INSERT INTO marks (student_id, exam_id, subject_id, marks)
+            INSERT INTO marks (student_id, exam_id, subject_id, marks_obtained)
             VALUES (%s, %s, %s, %s)
+            ON DUPLICATE KEY UPDATE
+            marks_obtained = VALUES(marks_obtained)
         """, (student_id, exam_id, subject_id, marks))
 
     conn.commit()
     cursor.close()
     conn.close()
 
-    flash('Marks saved successfully!', 'success')
-    return redirect(url_for('student_detail', student_id=student_id))
+    return jsonify({'message': 'Marks updated successfully!'})
+# Update Marks for All Students
+@app.route('/update-all-marks', methods=['POST'])
+def update_all_marks():
+    data = request.get_json()
+    exam_id = data['exam_id']
+    all_students_marks = data['all_students_marks']
 
-
-@app.route('/delete-mark/<int:mark_id>', methods=['GET'])
-def delete_mark(mark_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM marks WHERE id = %s", (mark_id,))
-    conn.commit()
+    for student_marks in all_students_marks:
+        student_id = student_marks['student_id']
+        for subject_mark in student_marks['subject_marks']:
+            subject_id = subject_mark['subject_id']
+            marks = subject_mark['marks']
+            
+            
+                # Ensure marks is a valid integer and in range 0-100
+            try:
+                marks = int(marks)
+            except (ValueError, TypeError):
+                marks = 0
+            if marks < 0 or marks > 100:
+                marks = 0
 
+            
+
+            # Update or insert marks for the student
+            cursor.execute("""
+                INSERT INTO marks (student_id, exam_id, subject_id, marks_obtained)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                marks_obtained = VALUES(marks_obtained)
+            """, (student_id, exam_id, subject_id, marks))
+
+    conn.commit()
     cursor.close()
     conn.close()
 
-    flash('Mark deleted successfully!', 'success')
-    return redirect(request.referrer)
+    return jsonify({'status': 'success', 'message': 'All marks updated successfully!'})
+
+
 
 
 @app.route('/generate-marksheet/<int:student_id>', methods=['GET'])
@@ -936,50 +1054,6 @@ def generate_marksheet(student_id):
 
     # Generate a PDF or render a marksheet template
     return render_template('marksheet.html', student=student, records=records)
-
-
-@app.route('/marks-management', methods=['GET', 'POST'])
-def marks_management():
-    # Ensure the admin is logged in
-    if 'admin_id' not in session:
-        flash('Please log in to access this feature.', 'danger')
-        return redirect(url_for('login'))
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # Fetch all marks with student, exam, and subject details
-    cursor.execute("""
-        SELECT marks.id, students.name AS student_name, exams.name AS exam_name, 
-               subjects.name AS subject_name, marks.marks, marks.student_id, 
-               marks.exam_id, marks.subject_id
-        FROM marks
-        JOIN students ON marks.student_id = students.id
-        JOIN exams ON marks.exam_id = exams.id
-        JOIN subjects ON marks.subject_id = subjects.id
-        ORDER BY students.name, exams.name, subjects.name
-    """)
-    marks = cursor.fetchall()
-
-    # Fetch all students, exams, and subjects for dropdowns
-    cursor.execute("SELECT id, name FROM students")
-    students = cursor.fetchall()
-
-    cursor.execute("SELECT id, name FROM exams")
-    exams = cursor.fetchall()
-
-    cursor.execute("SELECT id, name FROM subjects")
-    subjects = cursor.fetchall()
-
-    conn.close()
-
-    return render_template(
-        'marks_management.html',
-        marks=marks,
-        students=students,
-        exams=exams,
-        subjects=subjects
-    )
 
 
 @app.route('/exam-grade-setup', methods=['GET', 'POST'])
