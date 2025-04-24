@@ -1,288 +1,407 @@
+<!-- filepath: e:\marksheet_portal\templates\student_dashboard_admin_side.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{{ student.name }}'s Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f0fdfa 100%);
+            min-height: 100vh;
+            padding: 0 0 40px 0;
         }
-
+        .container {
+            max-width: 95%;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
+            padding: 32px 24px 24px 24px;
+        }
         h2, h3 {
             text-align: center;
+            color: #2d6cdf;
+            margin-top: 0;
         }
-
+        .info-box {
+            background-color: #f5f5f5;
+            padding: 18px;
+            margin-bottom: 24px;
+            border-radius: 10px;
+            border: 1px solid #e0e7ff;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .info-box img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #2d6cdf;
+            object-fit: cover;
+        }
+        .info-details {
+            flex: 1;
+        }
+        .info-details p {
+            margin: 6px 0;
+        }
+        .graph {
+            height: 32px;
+            background: linear-gradient(90deg, #2d6cdf 60%, #38bdf8 100%);
+            color: #fff;
+            text-align: center;
+            line-height: 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            transition: width 0.5s;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
         }
-
         th, td {
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: 1px solid #e0e7ff;
+            padding: 12px;
             text-align: center;
         }
-
-        .info-box {
-            background-color: #f5f5f5;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
+        th {
+            background: #e0e7ff;
+            color: #2d6cdf;
+            font-weight: 700;
         }
-
         .actions {
             text-align: center;
-            margin: 20px 0;
+            margin: 24px 0 0 0;
         }
-
         .actions button, .actions a {
-            margin: 5px;
-            padding: 8px 15px;
-            background-color: #4CAF50;
+            margin: 6px;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #2d6cdf 60%, #38bdf8 100%);
             color: white;
             border: none;
+            border-radius: 6px;
             text-decoration: none;
             cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s, transform 0.2s;
+            display: inline-block;
         }
-
-        .graph {
-            height: 30px;
-            background-color: #4CAF50;
-            text-align: center;
+        .actions button:hover, .actions a:hover {
+            background: linear-gradient(90deg, #38bdf8 60%, #2d6cdf 100%);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .edit-btn {
+            background: #2196F3;
             color: white;
+            border: none;
+            cursor: pointer;
+            padding: 7px 14px;
+            border-radius: 4px;
+            font-size: 1em;
+            margin-right: 4px;
         }
-
+        .edit-btn:hover {
+            background: #1976D2;
+        }
         .delete-btn {
-            background-color: #f44336;
+            background: #f44336;
+            color: white;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 4px;
+            border: none;
+            font-size: 1em;
         }
-
-
-        
+        .delete-btn:hover {
+            background: #d32f2f;
+        }
+        /* Modal styles */
         #marksModal {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            background: #fff;
+            padding: 28px 24px 18px 24px;
+            border: 1.5px solid #e0e7ff;
+            border-radius: 12px;
             z-index: 1000;
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.13);
+            min-width: 320px;
+            max-width: 95vw;
         }
-
         #marksModal h3 {
             margin-top: 0;
+            color: #2d6cdf;
         }
-
         #marksModal form {
             display: flex;
             flex-direction: column;
         }
-
         #marksModal label {
-            margin: 5px 0;
+            margin: 8px 0 4px 0;
+            font-weight: 500;
         }
-
         #marksModal input, #marksModal select {
             padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
+            margin-bottom: 12px;
+            border: 1px solid #c7d2fe;
             border-radius: 4px;
+            font-size: 1em;
         }
-
         #marksModal button {
-            margin: 5px 0;
-            padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
+            margin: 6px 0 0 0;
+            padding: 10px 0;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
         }
-
         #marksModal button[type="button"] {
-            background-color: #f44336;
+            background: #f44336;
         }
-
         #marksModal button[type="button"]:hover {
-            background-color: #d32f2f;
+            background: #d32f2f;
         }
-
         #marksModal button[type="submit"] {
-            background-color: #4CAF50;
-        }
-
-        #marksModal button[type="submit"]:hover {
-            background-color: #45a049;
-        }
-
-        .edit-btn {
-            background-color: #2196F3;
-            color: white;
+            background: linear-gradient(90deg, #2d6cdf 60%, #38bdf8 100%);
+            color: #fff;
             border: none;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 4px;
         }
-
-        .edit-btn:hover {
-            background-color: #1976D2;
-        }
-
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 4px;
+        #marksModal button[type="submit"]:hover {
+            background: linear-gradient(90deg, #38bdf8 60%, #2d6cdf 100%);
         }
 
 
-        .delete-btn:hover {
-            background-color: #d32f2f;
+        /* Accordion styles */
+        <style>
+            .accordion-item { margin-bottom: 16px; }
+            .accordion-btn {
+                width: 100%;
+                text-align: left;
+                padding: 14px;
+                font-size: 1.1em;
+                background: #e0e7ff;
+                color: #2d6cdf;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                outline: none;
+                font-weight: bold;
+                margin-bottom: 2px;
+                transition: background 0.2s;
+            }
+            .accordion-btn.active, .accordion-btn:hover {
+                background: #2d6cdf;
+                color: #fff;
+            }
+            .accordion-panel {
+                display: none;
+                padding: 0 8px 8px 8px;
+                background: #f8fafc;
+                border-radius: 0 0 8px 8px;
+            }
+            </style>
+            
+        @media (max-width: 700px) {
+            .container { padding: 10px 2px; }
+            .info-box { flex-direction: column; align-items: flex-start; gap: 10px; }
+            table, th, td { font-size: 0.95em; }
         }
-
-        .delete-btn:active {
-            background-color: #c62828;
-        }
-
-        .delete-btn:focus {
-            outline: none;
-        }
-
-        .delete-btn:focus-visible {
-            outline: 2px solid #f44336;
-            outline-offset: 2px;
-        }
-
-        .delete-btn:focus:not(:focus-visible) {
-            outline: none;
-        }
-
-
-        
     </style>
 </head>
 <body>
-    <h2>{{ student.name }}'s Dashboard</h2>
+    <div class="container">
+        <h2>{{ student.name }}'s Dashboard</h2>
 
-    <h3>Student Information</h3>
-    
-    <div class="info-box">
-      <!-- Displaying student profile photo -->
-      {% if student.profile_photo %}
-      <img src="{{ url_for('static', filename='images/student_photos/' ~ student.profile_photo) }}" 
-           alt="Profile Photo" 
-           style="width: 100px; height: 100px; border-radius: 50%;">
-      {% else %}
-        <p>No Profile Photo Available</p>
-      {% endif %}
-        <p><strong>Name:</strong> {{ student.name }}</p>
-        <p><strong>Class:</strong> {{ student.class }}</p>
-        <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
-        <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
-        <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
-        <p><strong>Father's Name:</strong> {{ student.father_name }}</p>
-        <p><strong>Mother's Name:</strong> {{ student.mother_name }}</p>
+        <h3>Student Information</h3>
+        <div class="info-box">
+            {% if student.profile_photo %}
+            <img src="{{ url_for('static', filename='images/student_photos/' ~ student.profile_photo) }}" alt="Profile Photo">
+            {% else %}
+            <img src="{{ url_for('static', filename='images/default_profile.png') }}" alt="No Profile Photo">
+            {% endif %}
+            <div class="info-details">
+                <p><strong>Name:</strong> {{ student.name }}</p>
+                <p><strong>Class:</strong> {{ student.class }}</p>
+                <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+                <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+                <p><strong>Date of Birth:</strong> {{ student.dob }}</p>
+                <p><strong>Father's Name:</strong> {{ student.father_name }}</p>
+                <p><strong>Mother's Name:</strong> {{ student.mother_name }}</p>
+            </div>
+        </div>
+
+        <h3>Overall Percentage</h3>
+        <div class="graph" style="width: {{ percentage }}%;">{{ percentage }}%</div>
+
+
+
+        <!-- filepath: e:\marksheet_portal\templates\student_dashboard_admin_side.html -->
+<h3>Exam Records</h3>
+{% if exams_dict %}
+<div class="accordion">
+    {% for exam_id, exam in exams_dict.items() %}
+    <div class="accordion-item">
+        <button class="accordion-btn" onclick="toggleAccordion(this)">
+            {{ exam.exam_name }}
+        </button>
+        <div class="accordion-panel">
+            <table>
+                <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Actions</th>
+                </tr>
+                {% for row in exam.subjects %}
+                <tr>
+                    <td>{{ row.subject_name }}</td>
+                    <td>{{ row.marks_obtained }}</td>
+                    <td>
+                        <button class="edit-btn"
+                            data-id="{{ row.id }}"
+                            data-exam="{{ exam_id }}"
+                            data-subject="{{ row.subject_id }}"
+                            data-marks="{{ row.marks_obtained }}">✏️ Edit</button>
+                        <a href="/delete-mark/{{ row.id }}" class="delete-btn" onclick="return confirm('Are you sure you want to delete this mark?');">🗑️ Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            <div class="actions">
+                <a href="/generate-marksheet/{{ student.id }}?exam_id={{ exam_id }}">📄 Download Marksheet</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+    <p style="text-align:center;">No marks added yet.</p>
+{% endif %}
+
+
+
+        <div class="actions">
+            <button id="addMarksBtn">➕ Add Marks</button>
+        </div>
+
+        <div class="actions">
+            <a href="/generate-marksheet/{{ student.id }}">📄 Download Marksheet</a>
+            <a href="/student-profile">🔙 Back to Students</a>
+        </div>
     </div>
 
-    <h3>Overall Percentage</h3>
-    <div class="graph" style="width: {{ percentage }}%;">{{ percentage }}%</div>
-
-    <h3>Exam Records</h3>
-    {% if records %}
-    <table>
-        <tr>
-            <th>Exam</th>
-            <th>Subject</th>
-            <th>Marks</th>
-            <th>Actions</th>
-        </tr>
-        {% for row in records %}
-        <tr>
-            <td>{{ row.exam_name }}</td>
-            <td>{{ row.subject_name }}</td>
-            <td>{{ row.marks }}</td>
-            <td>
-                <button class="edit-btn" data-id="{{ row.id }}" data-exam="{{ row.exam_name }}" data-subject="{{ row.subject_name }}" data-marks="{{ row.marks }}">✏️ Edit</button>
-                <a href="/delete-mark/{{ row.id }}" class="delete-btn">🗑️ Delete</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    {% else %}
-        <p style="text-align:center;">No marks added yet.</p>
-    {% endif %}
-    <div class="actions">
-        <button id="addMarksBtn">➕ Add Marks</button>
-    </div>
-
-    <div class="actions">
-        <a href="/generate-marksheet/{{ student.id }}">📄 Download Marksheet</a>
-        <a href="/student-profile">🔙 Back to Students</a>
-    </div>
-
-
-
-    <div id="marksModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border:1px solid #ccc; border-radius:8px; z-index:1000;">
+    <!-- Modal for Add/Edit Marks -->
+    <div id="marksModal">
         <h3 id="marksModalTitle">Add Marks</h3>
-        <form id="marksForm" method="POST" action="/add-edit-marks">
+        <form id="marksForm" method="POST" action="/add-edit-marks" onsubmit="return validateMarksForm();">
             <input type="hidden" name="student_id" value="{{ student.id }}">
             <input type="hidden" name="mark_id" id="markId">
             <label for="exam">Exam:</label>
             <select name="exam_id" id="exam" required>
+                <option value="">Select Exam</option>
                 {% for exam in exams %}
                 <option value="{{ exam.id }}">{{ exam.name }}</option>
                 {% endfor %}
-            </select><br>
+            </select>
             <label for="subject">Subject:</label>
             <select name="subject_id" id="subject" required>
+                <option value="">Select Subject</option>
                 {% for subject in subjects %}
                 <option value="{{ subject.id }}">{{ subject.name }}</option>
                 {% endfor %}
-            </select><br>
+            </select>
             <label for="marks">Marks:</label>
-            <input type="number" name="marks" id="marks" required><br>
+            <input type="number" name="marks" id="marks" min="0" max="100" required>
             <button type="submit">Save</button>
             <button type="button" onclick="closeModal()">Cancel</button>
         </form>
     </div>
 
-
     <script>
+        // Modal logic
         const marksModal = document.getElementById('marksModal');
         const marksForm = document.getElementById('marksForm');
         const marksModalTitle = document.getElementById('marksModalTitle');
-    
+        const markIdInput = document.getElementById('markId');
+        const examInput = document.getElementById('exam');
+        const subjectInput = document.getElementById('subject');
+        const marksInput = document.getElementById('marks');
+
         document.getElementById('addMarksBtn').addEventListener('click', () => {
             marksForm.reset();
+            markIdInput.value = '';
             marksModalTitle.textContent = 'Add Marks';
             marksModal.style.display = 'block';
         });
-    
+
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                const id = btn.getAttribute('data-id');
-                const exam = btn.getAttribute('data-exam');
-                const subject = btn.getAttribute('data-subject');
-                const marks = btn.getAttribute('data-marks');
-    
-                document.getElementById('markId').value = id;
-                document.getElementById('exam').value = exam;
-                document.getElementById('subject').value = subject;
-                document.getElementById('marks').value = marks;
-    
+                markIdInput.value = btn.getAttribute('data-id');
+                examInput.value = btn.getAttribute('data-exam');
+                subjectInput.value = btn.getAttribute('data-subject');
+                marksInput.value = btn.getAttribute('data-marks');
                 marksModalTitle.textContent = 'Edit Marks';
                 marksModal.style.display = 'block';
             });
         });
-    
+
         function closeModal() {
             marksModal.style.display = 'none';
         }
+
+        // Client-side validation for marks input
+        function validateMarksForm() {
+            const marks = parseInt(marksInput.value, 10);
+            if (isNaN(marks) || marks < 0 || marks > 100) {
+                alert('Please enter marks between 0 and 100.');
+                marksInput.focus();
+                return false;
+            }
+            if (!examInput.value || !subjectInput.value) {
+                alert('Please select both exam and subject.');
+                return false;
+            }
+            return true;
+        }
+
+        // Close modal on outside click
+        window.onclick = function(event) {
+            if (event.target == marksModal) {
+                closeModal();
+            }
+        }
+
+
+
+
+        // Accordion functionality
+        
+            function toggleAccordion(btn) {
+                btn.classList.toggle("active");
+                var panel = btn.nextElementSibling;
+                if (panel.style.display === "block") {
+                    panel.style.display = "none";
+                } else {
+                    panel.style.display = "block";
+                }
+            }
+
+
+
+            
+        
     </script>
 </body>
 </html>

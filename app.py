@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify, make_response
 import os  
 import mysql.connector
 from flask_mail import Mail, Message
@@ -7,6 +7,7 @@ import re
 import smtplib
 import datetime
 from datetime import timedelta
+import pdfkit
 
 app = Flask(__name__)
 app.secret_key = 'S@rb3sw@r_OTP_Se$$ion_Key_123!'  # Replace with a strong secret 
@@ -886,7 +887,6 @@ def delete_subject_class(type, id):
 #     conn.close()
 #     return render_template('edit_student.html', student=student)
 
-
 @app.route('/student-detail/<int:student_id>', methods=['GET'])
 def student_detail(student_id):
     conn = get_db_connection()
@@ -902,7 +902,7 @@ def student_detail(student_id):
 
     # Fetch exam records for the student
     cursor.execute("""
-        SELECT marks.id, exams.name AS exam_name, subjects.name AS subject_name, marks.marks
+        SELECT marks.id, exams.id AS exam_id, exams.name AS exam_name, subjects.id AS subject_id, subjects.name AS subject_name, marks.marks_obtained
         FROM marks
         JOIN exams ON marks.exam_id = exams.id
         JOIN subjects ON marks.subject_id = subjects.id
@@ -911,15 +911,25 @@ def student_detail(student_id):
     """, (student_id,))
     records = cursor.fetchall()
 
+    # Group records by exam
+    exams_dict = {}
+    for row in records:
+        exam_id = row['exam_id']
+        if exam_id not in exams_dict:
+            exams_dict[exam_id] = {
+                'exam_name': row['exam_name'],
+                'subjects': []
+            }
+        exams_dict[exam_id]['subjects'].append(row)
+
     # Fetch all exams and subjects for the dropdowns
     cursor.execute("SELECT id, name FROM exams")
     exams = cursor.fetchall()
-
     cursor.execute("SELECT id, name FROM subjects")
     subjects = cursor.fetchall()
 
-    # Calculate percentage
-    cursor.execute("SELECT AVG(marks) AS percentage FROM marks WHERE student_id = %s", (student_id,))
+    # Calculate overall percentage
+    cursor.execute("SELECT AVG(marks_obtained) AS percentage FROM marks WHERE student_id = %s", (student_id,))
     percentage = cursor.fetchone()['percentage'] or 0
 
     conn.close()
@@ -927,14 +937,59 @@ def student_detail(student_id):
     return render_template(
         'student_dashboard_admin_side.html',
         student=student,
-        records=records,
+        exams_dict=exams_dict,
         percentage=round(percentage, 2),
         exams=exams,
         subjects=subjects
     )
+
+
+@app.route('/generate-marksheet/<int:student_id>')
+def generate_marksheet(student_id):
+    exam_id = request.args.get('exam_id')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
+    student = cursor.fetchone()
+
+    if exam_id:
+        cursor.execute("""
+            SELECT exams.name AS exam_name,
+                   subjects.name AS subject_name,
+                   subjects.code,
+                   subjects.full_marks,
+                   marks.marks_obtained
+            FROM marks
+            JOIN exams ON marks.exam_id = exams.id
+            JOIN subjects ON marks.subject_id = subjects.id
+            WHERE marks.student_id = %s AND marks.exam_id = %s
+        """, (student_id, exam_id))
+    else:
+        cursor.execute("""
+            SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks_obtained
+            FROM marks
+            JOIN exams ON marks.exam_id = exams.id
+            JOIN subjects ON marks.subject_id = subjects.id
+            WHERE marks.student_id = %s
+        """, (student_id,))
+    records = cursor.fetchall()
+    conn.close()
+
+    # Render HTML
+    rendered = render_template('marksheet.html', student=student, records=records)
+    
+    path_wkhtmltopdf = r'C:\Users\sarbe\Downloads\wkhtmltox-0.12.6-1.mxe-cross-win64\wkhtmltox\bin\wkhtmltopdf.exe'  # Update if your path is different
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+    
+    pdf = pdfkit.from_string(rendered, False, configuration=config)
     
 
-
+    # Send as download
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'attachment; filename=marksheet_{student["name"]}.pdf'
+    return response
 
 
 
@@ -1055,6 +1110,14 @@ def update_marks():
     conn.close()
 
     return jsonify({'message': 'Marks updated successfully!'})
+
+
+
+
+
+
+
+
 # Update Marks for All Students
 @app.route('/update-all-marks', methods=['POST'])
 def update_all_marks():
@@ -1099,29 +1162,56 @@ def update_all_marks():
 
 
 
-@app.route('/generate-marksheet/<int:student_id>', methods=['GET'])
-def generate_marksheet(student_id):
+
+
+
+
+@app.route('/add-edit-marks', methods=['POST'])
+def add_edit_marks():
+    student_id = request.form['student_id']
+    exam_id = request.form['exam_id']
+    subject_id = request.form['subject_id']
+    marks = request.form['marks']
+
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    # Fetch student details
-    cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
-    student = cursor.fetchone()
-
-    # Fetch exam records
+    cursor = conn.cursor()
     cursor.execute("""
-        SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks
-        FROM marks
-        JOIN exams ON marks.exam_id = exams.id
-        JOIN subjects ON marks.subject_id = subjects.id
-        WHERE marks.student_id = %s
-    """, (student_id,))
-    records = cursor.fetchall()
-
+        INSERT INTO marks (student_id, exam_id, subject_id, marks_obtained)
+        VALUES (%s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE marks_obtained = %s
+    """, (student_id, exam_id, subject_id, marks, marks))
+    conn.commit()
+    cursor.close()
     conn.close()
+    flash('Marks saved successfully!', 'success')
+    return redirect(url_for('student_detail', student_id=student_id))
 
-    # Generate a PDF or render a marksheet template
-    return render_template('marksheet.html', student=student, records=records)
+
+
+
+# @app.route('/generate-marksheet/<int:student_id>', methods=['GET'])
+# def generate_marksheet(student_id):
+#     conn = get_db_connection()
+#     cursor = conn.cursor(dictionary=True)
+
+#     # Fetch student details
+#     cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
+#     student = cursor.fetchone()
+
+#     # Fetch exam records
+#     cursor.execute("""
+#         SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks
+#         FROM marks
+#         JOIN exams ON marks.exam_id = exams.id
+#         JOIN subjects ON marks.subject_id = subjects.id
+#         WHERE marks.student_id = %s
+#     """, (student_id,))
+#     records = cursor.fetchall()
+
+#     conn.close()
+
+#     # Generate a PDF or render a marksheet template
+#     return render_template('marksheet.html', student=student, records=records)
 
 
 @app.route('/exam-grade-setup', methods=['GET', 'POST'])
