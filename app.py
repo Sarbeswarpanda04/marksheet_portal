@@ -323,20 +323,16 @@ def student_dashboard():
         flash('Unauthorized access. Please log in as a student.', 'danger')
         return redirect(url_for('login'))
 
-    # Fetch student details
-    username = session['student_id']  # Use student ID for fetching details
-    # username = session['username']  # Use registration number for fetching details
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Get student info
-    cursor.execute("SELECT * FROM students WHERE registration_number = %s", (username,))
+    # Fetch student details
+    cursor.execute("SELECT * FROM students WHERE id = %s", (session['student_id'],))
     student = cursor.fetchone()
 
-    # Get exam records for the student
+    # Fetch exam records for the student
     cursor.execute("""
-        SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks
-        FROM marks
+        SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks_obtained        FROM marks
         JOIN exams ON marks.exam_id = exams.id
         JOIN subjects ON marks.subject_id = subjects.id
         WHERE marks.student_id = %s
@@ -344,17 +340,18 @@ def student_dashboard():
     """, (student['id'],))
     records = cursor.fetchall()
 
-    # Get percentage (simplified logic)
-    cursor.execute("SELECT AVG(marks) FROM marks WHERE student_id = %s", (student['id'],))
-    percentage = cursor.fetchone()['AVG(marks)'] or 0
+    # Calculate overall percentage
+    cursor.execute("SELECT AVG(marks_obtained) AS percentage FROM marks WHERE student_id = %s", (student['id'],))
+    percentage = cursor.fetchone()['percentage'] or 0
 
     conn.close()
 
-    # Pass data to the template
-    return render_template('student_dashboard.html',
-                           student=student,
-                           records=records,
-                           percentage=round(percentage, 2))
+    return render_template(
+        'student_dashboard.html',
+        student=student,
+        records=records,
+        percentage=round(percentage, 2)
+    )
 
 
 @app.route('/edit-admin-profile', methods=['GET', 'POST'])
@@ -957,7 +954,7 @@ def generate_marksheet(student_id):
         cursor.execute("""
             SELECT exams.name AS exam_name,
                    subjects.name AS subject_name,
-                   subjects.code,
+                   subjects.code AS subject_code,
                    subjects.full_marks,
                    marks.marks_obtained
             FROM marks

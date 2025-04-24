@@ -1,4 +1,4 @@
-<!-- Student Dashboard -->
+<!-- filepath: e:\marksheet_portal\templates\student_dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,122 +9,110 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Poppins', Arial, sans-serif; background: #f4f6fb; margin: 0; }
+        .container { max-width: 1100px; margin: 30px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(44,62,80,0.10); padding: 32px 24px; display: flex; gap: 32px; }
+        .sidebar { width: 220px; background: #2d6cdf; color: #fff; border-radius: 12px; padding: 24px 16px; min-height: 500px; }
+        .sidebar h4 { margin-top: 0; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li { margin: 18px 0; }
+        .sidebar ul li a { color: #fff; text-decoration: none; font-weight: 500; transition: color 0.2s; }
+        .sidebar ul li a:hover { color: #e0e7ff; }
+        .content { flex: 1; }
+        .profile-card { display: flex; align-items: center; gap: 24px; margin-bottom: 24px; }
+        .profile-photo { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid #2d6cdf; }
+        .profile-info h2 { margin: 0 0 8px 0; }
+        .profile-info p { margin: 2px 0; }
+        .actions { margin-bottom: 18px; }
+        .btn { background: #2d6cdf; color: #fff; border: none; padding: 8px 22px; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #1e429f; }
+        .info-box { background: #f8fafc; border-radius: 10px; padding: 18px 22px; margin-bottom: 24px; }
+        .info-box h3 { margin-top: 0; }
+        .graph-container { margin-bottom: 24px; }
+        .graph-title { margin-bottom: 8px; }
+        .graph { background: #e0e7ff; border-radius: 8px; height: 28px; width: 100%; }
+        .graph-bar-value { background: #2d6cdf; color: #fff; height: 100%; border-radius: 8px; text-align: right; padding-right: 12px; line-height: 28px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        th, td { border: 1px solid #2d6cdf; padding: 10px 8px; text-align: center; }
+        th { background: #e0e7ff; }
+        .edit-btn, .delete-btn { color: #2d6cdf; text-decoration: none; margin: 0 4px; }
+        .edit-btn:hover, .delete-btn:hover { text-decoration: underline; }
+        @media (max-width: 900px) {
+            .container { flex-direction: column; padding: 12px 4px; }
+            .sidebar { width: 100%; min-height: unset; margin-bottom: 18px; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h2>Welcome, {{ student.name }}</h2>
-
-        <h3>Your Dashboard</h3>
-        <div class="actions">
-            <a href="{{ url_for('logout') }}" class="btn">Logout</a>
-        </div>
-
-
-
-
-
-
-
-
-        <!-- Sidebar Navigation (Optional) -->
-
+        <!-- Sidebar Navigation -->
         <div class="sidebar">
             <h4>Navigation</h4>
             <ul>
-                
+                <li><a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('student_notifications') }}"><i class="fas fa-bell"></i> Notifications</a></li>
+                <li><a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
         <div class="content">
-            <h3>Student Information</h3>
-            <p><strong>ID:</strong> {{ student.id }}</p>
-            <p><strong>Name:</strong> {{ student.name }}</p>
-            <p><strong>Email:</strong> {{ student.email }}</p>
-            <p><strong>Class:</strong> {{ student.class }}</p>
-            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
-            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
-            <p><strong>Address:</strong> {{ student.address }}</p>
-            <p><strong>Phone:</strong> {{ student.phone }}</p>
-        </div>
-
-        <!-- 
-        <div class="features">
-            <div class="feature-box">
-                <i class="fas fa-user-graduate"></i>
-                <h3>View Profile</h3>
-                <p>Check your personal details and profile information.</p>
-                <i class="fas fa-book"></i>
-                <h3>View Marks</h3>
-                <p>Check your exam records and marks.</p>
-                <i class="fas fa-calendar-alt"></i>
-                <h3>Exam Schedule</h3>
-                <p>View your upcoming exams and schedules.</p>
-                <i class="fas fa-comments"></i>
-                <h3>Contact Admin</h3>
-                <p>Reach out to the admin for any queries or issues.</p>
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <img src="{{ url_for('static', filename='images/student_photos/' + (student.profile_photo if student.profile_photo else 'default.png')) }}" alt="Profile Photo" class="profile-photo">
+                <div class="profile-info">
+                    <h2>{{ student.name }}</h2>
+                    <p><strong>Class:</strong> {{ student.class }}</p>
+                    <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+                    <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+                    <p><strong>Email:</strong> {{ student.email }}</p>
+                </div>
             </div>
-        </div> --> 
-
-        
-
-        <!-- Profile Photo Section -->
-        <div class="profile-photo-container">
-            <img src="{{ url_for('static', filename='images/student_photos/' + (student.profile_photo if student.profile_photo else 'default.png')) }}" alt="Profile Photo" class="profile-photo">
-            <h3>{{ student.name }}</h3>
-            <p><strong>Class:</strong> {{ student.class }}</p>
-            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
-            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
-            <p><strong>Email:</strong> {{ student.email }}</p>
-        </div>
-
-        <!-- Student Information -->
-        <div class="info-box">
-            <h3>Student Information</h3>
-            <p><strong>ID:</strong> {{ student.id }}</p>
-            <p><strong>Name:</strong> {{ student.name }}</p>
-            <p><strong>Email:</strong> {{ student.email }}</p>
-            <p><strong>Class:</strong> {{ student.class }}</p>
-            <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
-            <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
-            <p><strong>Address:</strong> {{ student.address }}</p>
-            <p><strong>Phone:</strong> {{ student.phone }}</p>
-        </div>
-
-        <!-- Overall Percentage -->
-        <div class="graph-container">
-            <h3 class="graph-title">Overall Percentage</h3>
-            <div class="graph" style="width: 100%;">
-                <div class="graph-bar-value" style="width: {{ percentage }}%;">{{ percentage }}%</div>
+            <!-- Info Box -->
+            <div class="info-box">
+                <h3>Student Information</h3>
+                <p><strong>ID:</strong> {{ student.id }}</p>
+                <p><strong>Name:</strong> {{ student.name }}</p>
+                <p><strong>Email:</strong> {{ student.email }}</p>
+                <p><strong>Class:</strong> {{ student.class }}</p>
+                <p><strong>Roll No:</strong> {{ student.roll_no }}</p>
+                <p><strong>Registration No:</strong> {{ student.registration_number }}</p>
+                <p><strong>Address:</strong> {{ student.address }}</p>
+                <p><strong>Phone:</strong> {{ student.phone }}</p>
             </div>
+            <!-- Overall Percentage -->
+            <div class="graph-container">
+                <h3 class="graph-title">Overall Percentage</h3>
+                <div class="graph">
+                    <div class="graph-bar-value" style="width: {{ percentage }}%;">{{ percentage }}%</div>
+                </div>
+            </div>
+            <!-- Exam Records Table -->
+            <h3>Exam Records</h3>
+            {% if records %}
+            <table>
+                <tr>
+                    <th>Exam</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Actions</th>
+                </tr>
+                {% for row in records %}
+                <tr>
+                    <td>{{ row.exam_name }}</td>
+                    <td>{{ row.subject_name }}</td>
+                    <td>{{ row.marks_obtained }}</td>
+                    <td>
+                        <a href="#" class="edit-btn" title="Edit"><i class="fas fa-edit"></i></a>
+                        <a href="#" class="delete-btn" title="Delete"><i class="fas fa-trash"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p style="text-align:center;">No marks added yet.</p>
+            {% endif %}
         </div>
-
-        <!-- Exam Records -->
-        <h3>Exam Records</h3>
-        {% if records %}
-        <table>
-            <tr>
-                <th>Exam</th>
-                <th>Subject</th>
-                <th>Marks</th>
-                <th>Actions</th>
-            </tr>
-            {% for row in records %}
-            <tr>
-                <td>{{ row.exam_name }}</td>
-                <td>{{ row.subject_name }}</td>
-                <td>{{ row.marks }}</td>
-                <td>
-                    <a href="#" class="edit-btn">✏️ Edit</a> |
-                    <a href="#" class="delete-btn">🗑️ Delete</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        <p style="text-align:center;">No marks added yet.</p>
-        {% endif %}
-
     </div>
-
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -139,14 +127,6 @@
             </script>
         {% endif %}
     {% endwith %}
-
-    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/js/all.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
-    <script>
-        particlesJS.load('particles', 'https://cdn.jsdelivr.net/gh/VincentGarreau/particles.js/particles.json', function() {
-            console.log('Particles.js loaded');
-        });
-    </script>
 </body>
 </html>

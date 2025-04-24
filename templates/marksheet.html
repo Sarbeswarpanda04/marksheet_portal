@@ -10,10 +10,6 @@
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #2d6cdf; padding: 8px; text-align: center; }
         th { background: #e0e7ff; }
-        .footer { margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .stamp { width: 100px; }
-        .signature { width: 120px; }
-        .note { margin-top: 30px; font-size: 1.1em; color: #2d6cdf; }
     </style>
 </head>
 <body>
@@ -69,12 +65,12 @@
 </div>
 <div class="footer">
     <div class="footer-left">
-        <img src="{{ url_for('static', filename='images/college_stamp.png', _external=True) }}" class="stamp" alt="College Stamp"><br>
-        <span>College Stamp</span>
-    </div>
-    <div class="footer-right">
         <img src="{{ url_for('static', filename='images/principal_sign.png', _external=True) }}" class="signature" alt="Principal Signature"><br>
         <span>Principal</span>
+    </div>
+    <div class="footer-right">
+        <img src="{{ url_for('static', filename='images/college_stamp.png', _external=True) }}" class="stamp" alt="College Stamp"><br>
+        <span>College Stamp</span>
     </div>
 </div>
 <style>
@@ -88,10 +84,11 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
 }
-.footer-left, .footer-right {
-    text-align: center;
-}
+
 .stamp {
     width: 90px;
     height: auto;
@@ -101,16 +98,9 @@
     width: 110px;
     height: auto;
     margin-bottom: 4px;
-
 }
 
-.footer-left img, .footer-right img {
-    width: 100px;
-    height: auto;
-    border-radius: 8px;
-    border: 2px solid #2d6cdf;
-    object-fit: cover;
-}
+
 </style>
     <script>
         window.print();
