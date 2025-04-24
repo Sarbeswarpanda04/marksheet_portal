@@ -330,15 +330,41 @@ def student_dashboard():
     cursor.execute("SELECT * FROM students WHERE id = %s", (session['student_id'],))
     student = cursor.fetchone()
 
-    # Fetch exam records for the student
+    # Fetch exam records for the student (with exam and subject info)
     cursor.execute("""
-        SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks_obtained        FROM marks
+        SELECT marks.id, exams.id AS exam_id, exams.name AS exam_name,
+               subjects.id AS subject_id, subjects.name AS subject_name,
+               marks.marks_obtained
+        FROM marks
         JOIN exams ON marks.exam_id = exams.id
         JOIN subjects ON marks.subject_id = subjects.id
         WHERE marks.student_id = %s
-        ORDER BY exams.name, subjects.name
+        ORDER BY exams.id, subjects.name
     """, (student['id'],))
     records = cursor.fetchall()
+
+    # Build exams_dict for accordion
+    exams_dict = {}
+    for row in records:
+        exam_id = row['exam_id']
+        if exam_id not in exams_dict:
+            exams_dict[exam_id] = {
+                'exam_name': row['exam_name'],
+                'subjects': []
+            }
+        exams_dict[exam_id]['subjects'].append(row)
+        
+    # Fetch rechecking requests for this student
+    cursor.execute("""
+        SELECT r.status, r.remark, e.name as exam_name, sub.name as subject_name, r.reason, r.solved_at
+        FROM rechecking_requests r
+        JOIN exams e ON r.exam_id = e.id
+        JOIN subjects sub ON r.subject_id = sub.id
+        WHERE r.student_id=%s
+        ORDER BY r.created_at DESC
+    """, (student['id'],))
+    student_rechecking_requests = cursor.fetchall()
+    
 
     # Calculate overall percentage
     cursor.execute("SELECT AVG(marks_obtained) AS percentage FROM marks WHERE student_id = %s", (student['id'],))
@@ -349,9 +375,106 @@ def student_dashboard():
     return render_template(
         'student_dashboard.html',
         student=student,
-        records=records,
-        percentage=round(percentage, 2)
+        exams_dict=exams_dict,
+        percentage=round(percentage, 2),
+        student_rechecking_requests=student_rechecking_requests
     )
+
+
+# @app.route('/apply-rechecking', methods=['POST'])
+# def apply_rechecking():
+#     if 'student_id' not in session:
+#         flash('Please log in.', 'danger')
+#         return redirect(url_for('login'))
+#     student_id = session['student_id']
+#     exam_id = request.form['exam_id']
+#     subject_id = request.form['subject_id']
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     # Prevent duplicate requests
+#     cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
+#     if cursor.fetchone():
+#         flash('Already applied for rechecking for this subject.', 'warning')
+#     else:
+#         cursor.execute("INSERT INTO rechecking_requests (student_id, exam_id, subject_id) VALUES (%s, %s, %s)", (student_id, exam_id, subject_id))
+#         conn.commit()
+#         flash('Rechecking request submitted.', 'success')
+#     conn.close()
+#     return redirect(url_for('student_dashboard'))
+
+@app.route('/apply-rechecking', methods=['POST'])
+def apply_rechecking():
+    if 'student_id' not in session:
+        flash('Please log in.', 'danger')
+        return redirect(url_for('login'))
+    student_id = session['student_id']
+    exam_id = request.form['exam_id']
+    subject_id = request.form['subject_id']
+    reason = request.form['reason']
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Prevent duplicate requests
+    cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
+    if cursor.fetchone():
+        flash('Already applied for rechecking for this subject.', 'warning')
+    else:
+        cursor.execute(
+            "INSERT INTO rechecking_requests (student_id, exam_id, subject_id, reason) VALUES (%s, %s, %s, %s)",
+            (student_id, exam_id, subject_id, reason)
+        )
+        conn.commit()
+        flash('Rechecking request submitted.', 'success')
+    conn.close()
+    return redirect(url_for('student_dashboard'))
+
+
+@app.route('/admin/rechecking-requests')
+def admin_rechecking_requests():
+    if 'admin_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    # Pending
+    cursor.execute("""
+        SELECT r.id, r.student_id, s.name as student_name, e.name as exam_name, sub.name as subject_name, r.reason
+        FROM rechecking_requests r
+        JOIN students s ON r.student_id = s.id
+        JOIN exams e ON r.exam_id = e.id
+        JOIN subjects sub ON r.subject_id = sub.id
+        WHERE r.status='Pending'
+        ORDER BY r.created_at DESC
+    """)
+    pending_requests = cursor.fetchall()
+    # Solved
+    cursor.execute("""
+        SELECT r.id, r.student_id, s.name as student_name, e.name as exam_name, sub.name as subject_name, r.remark, r.reason, r.solved_at
+        FROM rechecking_requests r
+        JOIN students s ON r.student_id = s.id
+        JOIN exams e ON r.exam_id = e.id
+        JOIN subjects sub ON r.subject_id = sub.id
+        WHERE r.status='Solved'
+        ORDER BY r.solved_at DESC
+    """)
+    solved_requests = cursor.fetchall()
+    conn.close()
+    return render_template('admin_rechecking_requests.html',
+                           pending_requests=pending_requests,
+                           solved_requests=solved_requests)
+
+@app.route('/admin/solve-rechecking', methods=['POST'])
+def solve_rechecking():
+    if 'admin_id' not in session:
+        return redirect(url_for('login'))
+    request_id = request.form['request_id']
+    remark = request.form['remark']
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE rechecking_requests SET status='Solved', remark=%s, solved_at=NOW() WHERE id=%s", (remark, request_id))
+    conn.commit()
+    conn.close()
+    flash('Marked as solved.', 'success')
+    return redirect(url_for('admin_rechecking_requests'))
+
 
 
 @app.route('/edit-admin-profile', methods=['GET', 'POST'])
@@ -434,84 +557,6 @@ def change_admin_password():
     conn.close()
 
     return jsonify({'status': 'success', 'message': 'Password updated successfully.'})
-
-
-
-
-
-# @app.route('/admin-dashboard')
-# def admin_dashboard():
-#     # Ensure the admin is logged in
-#     if 'admin_id' not in session:
-#         flash('Please log in to access the dashboard.', 'danger')
-#         return redirect(url_for('login'))
-
-#     admin_id = session['admin_id']  # Get the logged-in admin's ID from the session
-
-#     conn = get_db_connection()
-#     cursor = conn.cursor(dictionary=True)
-
-#     # Fetch admin details
-#     cursor.execute("SELECT name, profile_photo FROM admin WHERE admin_id = %s", (admin_id,))
-#     admin = cursor.fetchone()
-
-#     # Fetch dashboard statistics
-#     cursor.execute("SELECT COUNT(*) AS total_students FROM students")
-#     total_students = cursor.fetchone()['total_students']
-
-#     cursor.execute("SELECT COUNT(*) AS total_subjects FROM subjects")
-#     total_subjects = cursor.fetchone()['total_subjects']
-
-#     cursor.execute("SELECT COUNT(*) AS total_exams FROM exams")
-#     total_exams = cursor.fetchone()['total_exams']
-
-#     # Example placeholder for the latest marksheet
-#     cursor.execute("SELECT MAX(generated_date) AS latest_mark FROM marksheet")
-#     latest_mark = cursor.fetchone()['latest_mark'] or "No marksheet available"
-
-#     cursor.close()
-#     conn.close()
-
-#     return render_template(
-#         "admin_dashboard.html",
-#         admin=admin,
-#         total_students=total_students,
-#         total_subjects=total_subjects,
-#         total_exams=total_exams,
-#         latest_mark=latest_mark
-#     )
-
-
-
-# @app.route('/admin-dashboard')
-# def admin_dashboard():
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-
-#     cursor.execute("SELECT COUNT(*) FROM students")
-#     total_students = cursor.fetchone()[0]
-
-#     cursor.execute("SELECT COUNT(*) FROM subjects")
-#     total_subjects = cursor.fetchone()[0]
-
-#     cursor.execute("SELECT COUNT(*) FROM exams")
-#     total_exams = cursor.fetchone()[0]
-
-#     #Example placeholder for latest marksheet
-#     latest_mark = "Final_Exam_Results_2023"
-#     #cursor.execute("SELECT exam_id, student_id, generated_date FROM marksheet ORDER BY generated_date DESC LIMIT 1")      
-    
-
-#     conn.close()
-
-#     return render_template("admin_dashboard.html",
-#                            total_students=total_students,
-#                            total_subjects=total_subjects,
-#                            total_exams=total_exams,
-#                            latest_mark=latest_mark)
-
-
-
 
 
 
@@ -861,28 +906,6 @@ def delete_subject_class(type, id):
     return jsonify({'status': 'success', 'message': f'{type.capitalize()} deleted successfully!'})
 
 
-# @app.route('/edit-student/<int:id>', methods=['GET', 'POST'])
-# def edit_student(id):
-#     conn = get_db_connection()
-#     student = conn.execute('SELECT * FROM students WHERE id = ?', (id,)).fetchone()
-
-#     if request.method == 'POST':
-#         name = request.form['name']
-#         student_class = request.form['class']
-#         roll_no = request.form['roll_no']
-#         reg_no = request.form['registration_number']
-
-#         conn.execute('''
-#             UPDATE students
-#             SET name = ?, class = ?, roll_no = ?, registration_number = ?
-#             WHERE id = ?
-#         ''', (name, student_class, roll_no, reg_no, id))
-#         conn.commit()
-#         conn.close()
-#         return redirect(url_for('student_profile'))
-
-#     conn.close()
-#     return render_template('edit_student.html', student=student)
 
 @app.route('/student-detail/<int:student_id>', methods=['GET'])
 def student_detail(student_id):
@@ -1186,31 +1209,6 @@ def add_edit_marks():
 
 
 
-# @app.route('/generate-marksheet/<int:student_id>', methods=['GET'])
-# def generate_marksheet(student_id):
-#     conn = get_db_connection()
-#     cursor = conn.cursor(dictionary=True)
-
-#     # Fetch student details
-#     cursor.execute("SELECT * FROM students WHERE id = %s", (student_id,))
-#     student = cursor.fetchone()
-
-#     # Fetch exam records
-#     cursor.execute("""
-#         SELECT exams.name AS exam_name, subjects.name AS subject_name, marks.marks
-#         FROM marks
-#         JOIN exams ON marks.exam_id = exams.id
-#         JOIN subjects ON marks.subject_id = subjects.id
-#         WHERE marks.student_id = %s
-#     """, (student_id,))
-#     records = cursor.fetchall()
-
-#     conn.close()
-
-#     # Generate a PDF or render a marksheet template
-#     return render_template('marksheet.html', student=student, records=records)
-
-
 @app.route('/exam-grade-setup', methods=['GET', 'POST'])
 def exam_grade_setup():
     # Ensure the admin is logged in
@@ -1258,19 +1256,24 @@ def add_edit_exam():
     flash('Exam saved successfully!', 'success')
     return redirect(url_for('exam_grade_setup'))
 
-@app.route('/delete-exam/<int:exam_id>', methods=['GET'])
+
+
+@app.route('/delete-exam/<int:exam_id>')
 def delete_exam(exam_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-
+    # Delete rechecking requests for this exam
+    cursor.execute("DELETE FROM rechecking_requests WHERE exam_id = %s", (exam_id,))
+    # Delete marks for this exam
+    cursor.execute("DELETE FROM marks WHERE exam_id = %s", (exam_id,))
+    # Now delete the exam
     cursor.execute("DELETE FROM exams WHERE id = %s", (exam_id,))
     conn.commit()
-
-    cursor.close()
     conn.close()
-
-    flash('Exam deleted successfully!', 'success')
+    flash('Exam and all related data deleted.', 'success')
     return redirect(url_for('exam_grade_setup'))
+
+
 
 
 @app.route('/add-edit-grade', methods=['POST'])
@@ -1864,18 +1867,27 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Fetch top 3 students based on percentage
-    cursor.execute("""
-        SELECT name, roll_no, percentage, profile_photo 
-        FROM students 
-        ORDER BY percentage DESC 
-        LIMIT 3
-    """)
-    top_students = cursor.fetchall()
+    # Get the latest exam
+    cursor.execute("SELECT id FROM exams ORDER BY id DESC LIMIT 1")
+    latest_exam = cursor.fetchone()
+    top_students = []
+    if latest_exam:
+        exam_id = latest_exam['id']
+        # Get top 3 students for the latest exam by percentage
+        cursor.execute("""
+            SELECT s.name, s.roll_no, s.profile_photo,
+                   ROUND(SUM(m.marks_obtained) / SUM(sub.full_marks) * 100, 2) AS percentage
+            FROM marks m
+            JOIN students s ON m.student_id = s.id
+            JOIN subjects sub ON m.subject_id = sub.id
+            WHERE m.exam_id = %s
+            GROUP BY m.student_id
+            ORDER BY percentage DESC
+            LIMIT 3
+        """, (exam_id,))
+        top_students = cursor.fetchall()
 
-    cursor.close()
     conn.close()
-
     return render_template('index.html', top_students=top_students)
 
 

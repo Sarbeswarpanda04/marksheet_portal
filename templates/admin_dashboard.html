@@ -229,6 +229,7 @@
                 <li><a href="{{ url_for('marks_management') }}"><i class="fas fa-chart-line"></i> Marks Management</a></li>
                 <li><a href="#"><i class="fas fa-file-alt"></i> Report Generation</a></li>
                 <li><a href="{{ url_for('exam_grade_setup') }}"><i class="fas fa-cogs"></i> Exam & Grade Setup</a></li> 
+                <li><a href="{{ url_for('admin_rechecking_requests') }}"><i class="fas fa-undo"></i> Rechecking Requests</a></li>
                 <li><a href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i> Notifications</a></li>  
                 <li><a href="{{ url_for('settings') }}"><i class="fas fa-cogs"></i> Settings</a></li>
         </nav>
@@ -273,7 +274,8 @@
                 ('Report Generation', 'report-generation'),
                 ('Exam & Grade Setup', 'exam-grade-setup'),
                 ('Notifications / Announcements', 'notifications'),
-                ('Settings', 'settings')
+                ('Settings', 'settings'),
+                ('Rechecking Requests', 'admin/rechecking-requests')
             ] %}
             <div class="col-md-3">
                 <div class="card p-3 text-center feature-box">

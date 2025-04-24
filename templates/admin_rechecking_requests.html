@@ -1,0 +1,235 @@
+<style>
+    body {
+        background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+        min-height: 100vh;
+    }
+    .rechecking-section {
+        max-width: 1100px;
+        margin: 40px auto 0 auto;
+        background: #fff;
+        border-radius: 22px;
+        box-shadow: 0 8px 36px rgba(44,62,80,0.13);
+        padding: 38px 34px 34px 34px;
+        font-family: 'Poppins', Arial, sans-serif;
+        animation: fadeIn 0.8s;
+    }
+    .rechecking-section h2, .rechecking-section h3 {
+        color: #2d6cdf;
+        font-weight: 800;
+        margin-bottom: 22px;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, #2d6cdf 20%, #4f8cff 80%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .rechecking-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 36px;
+        background: #f4f6fb;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(44, 62, 80, 0.10);
+        animation: fadeIn 0.7s;
+    }
+    .rechecking-table th, .rechecking-table td {
+        padding: 18px 14px;
+        text-align: center;
+        font-size: 1.12em;
+        border-bottom: 1.5px solid #e0e7ff;
+        transition: background 0.22s;
+    }
+    .rechecking-table th {
+        background: linear-gradient(90deg, #e0e7ff 60%, #c7d7ff 100%);
+        color: #2d6cdf;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        border: none;
+        font-size: 1.13em;
+    }
+    .rechecking-table tr:last-child td {
+        border-bottom: none;
+    }
+    .rechecking-table tr {
+        background: transparent;
+    }
+    .rechecking-table tr:hover td {
+        background: linear-gradient(90deg, #f0f7ff 60%, #e0e7ff 100%);
+        transition: background 0.22s;
+    }
+    .exam-action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 26px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background 0.22s, box-shadow 0.18s, transform 0.13s;
+        text-decoration: none;
+        margin-right: 10px;
+        box-shadow: 0 2px 14px rgba(44, 62, 80, 0.09);
+        outline: none;
+        background-size: 200% 200%;
+        letter-spacing: 0.5px;
+    }
+    .exam-action-btn.download {
+        background: linear-gradient(90deg, #2d6cdf 0%, #4f8cff 100%);
+        color: #fff;
+        box-shadow: 0 4px 18px #2d6cdf22;
+    }
+    .exam-action-btn.download:hover {
+        background: linear-gradient(270deg, #4f8cff 0%, #2d6cdf 100%);
+        box-shadow: 0 8px 24px #2d6cdf33;
+        transform: translateY(-2px) scale(1.06);
+    }
+    .exam-action-btn.recheck {
+        background: linear-gradient(90deg, #ff9800 0%, #ffc107 100%);
+        color: #fff;
+        box-shadow: 0 4px 18px #ff980022;
+    }
+    .exam-action-btn.recheck:hover {
+        background: linear-gradient(270deg, #ffc107 0%, #ff9800 100%);
+        box-shadow: 0 8px 24px #ff980033;
+        transform: translateY(-2px) scale(1.06);
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        overflow: auto;
+        background: rgba(0,0,0,0.3);
+        animation: fadeIn 0.3s;
+    }
+    .modal-content {
+        background: #fff;
+        margin: 8% auto;
+        padding: 36px 30px 26px 30px;
+        border-radius: 16px;
+        width: 95%;
+        max-width: 420px;
+        position: relative;
+        animation: popIn 0.3s;
+        box-shadow: 0 8px 32px rgba(44,62,80,0.18);
+    }
+    .close {
+        position: absolute;
+        right: 18px;
+        top: 12px;
+        font-size: 1.7em;
+        cursor: pointer;
+        color: #2d6cdf;
+        transition: color 0.2s;
+    }
+    .close:hover {
+        color: #ff9800;
+    }
+    .modal-content h3 {
+        color: #2d6cdf;
+        margin-bottom: 18px;
+        font-weight: 700;
+    }
+    .modal-content textarea {
+        width: 100%;
+        border-radius: 9px;
+        border: 1.5px solid #e0e7ff;
+        padding: 12px;
+        font-size: 1em;
+        margin-bottom: 14px;
+        resize: vertical;
+        min-height: 70px;
+        transition: border 0.2s;
+        font-family: 'Poppins', Arial, sans-serif;
+    }
+    .modal-content textarea:focus {
+        border: 2px solid #2d6cdf;
+        outline: none;
+    }
+    @keyframes popIn {
+        from {transform: scale(0.8); opacity: 0;}
+        to {transform: scale(1); opacity: 1;}
+    }
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    @media (max-width: 900px) {
+        .rechecking-section { padding: 16px 4px; }
+        .modal-content { padding: 18px 6px 14px 6px; }
+        th, td { font-size: 0.98em; padding: 8px 4px; }
+    }
+    </style>
+    
+    <div class="rechecking-section">
+        <h3>Pending Rechecking Requests</h3>
+        <table class="rechecking-table">
+            <tr>
+                <th>Student</th>
+                <th>Exam</th>
+                <th>Subject</th>
+                <th>Reason</th>
+                <th>Action</th>
+            </tr>
+            {% for req in pending_requests %}
+            <tr>
+                <td>{{ req.student_name }}</td>
+                <td>{{ req.exam_name }}</td>
+                <td>{{ req.subject_name }}</td>
+                <td>{{ req.reason }}</td>
+                <td>
+                    <a href="{{ url_for('student_detail', student_id=req.student_id) }}" class="exam-action-btn download" target="_blank">Check Marks</a>
+                    <button class="exam-action-btn recheck" onclick="openSolveModal({{ req.id }})">Solved</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    
+        <h3 style="margin-top:32px;">Solved Requests</h3>
+        <table class="rechecking-table">
+            <tr>
+                <th>Student</th>
+                <th>Exam</th>
+                <th>Subject</th>
+                <th>Reason</th>
+                <th>Remark</th>
+                <th>Solved At</th>
+            </tr>
+            {% for req in solved_requests %}
+            <tr>
+                <td>{{ req.student_name }}</td>
+                <td>{{ req.exam_name }}</td>
+                <td>{{ req.subject_name }}</td>
+                <td>{{ req.reason }}</td>
+                <td>{{ req.remark }}</td>
+                <td>{{ req.solved_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    
+    <!-- Solve Modal -->
+    <div id="solveModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeSolveModal()">&times;</span>
+            <h3>Enter Remark</h3>
+            <form id="solveForm" method="POST" action="{{ url_for('solve_rechecking') }}">
+                <input type="hidden" name="request_id" id="modal_request_id">
+                <textarea name="remark" required placeholder="Enter remark..."></textarea>
+                <button type="submit" class="exam-action-btn recheck" style="margin-top:12px;">Submit</button>
+            </form>
+        </div>
+    </div>
+    <script>
+    function openSolveModal(request_id) {
+        document.getElementById('solveModal').style.display = 'block';
+        document.getElementById('modal_request_id').value = request_id;
+    }
+    function closeSolveModal() {
+        document.getElementById('solveModal').style.display = 'none';
+    }
+    </script>
