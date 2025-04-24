@@ -2,14 +2,133 @@
 
 {% block content %}
 <section class="contact-section">
-  <div class="container">
+  <div class="contact-container">
     <h2>Contact Us</h2>
-    <p>For any issues or queries related to the portal, please reach out:</p>
-    <ul>
-      <li>Email: support@college.edu</li>
-      <li>Phone: +91-9876543210</li>
-      <li>Address: GIFT College Campus, Bhubaneswar</li>
+    <p>For any issues, feedback, or queries related to the portal, please reach out to us using the details below or the contact form.</p>
+    <ul class="contact-details">
+      <li><strong>Email:</strong> <a href="mailto:support@college.edu">support@college.edu</a></li>
+      <li><strong>Phone:</strong> <a href="tel:+919876543210">+91-9876543210</a></li>
+      <li><strong>Address:</strong> GIFT College Campus, Bhubaneswar</li>
     </ul>
+    <form class="contact-form">
+      <div class="form-group">
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Your Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="message">Your Message</label>
+        <textarea id="message" name="message" rows="4" placeholder="Type your message here..." required></textarea>
+      </div>
+      <button type="submit" class="contact-btn">Send Message</button>
+    </form>
   </div>
 </section>
+
+<style>
+  /* Contact Section Styles */
+.contact-section {
+  background: linear-gradient(120deg, #e3eaff 0%, #f7f9fc 100%);
+  padding: 60px 0 40px 0;
+  min-height: 70vh;
+}
+
+.contact-container {
+  max-width: 520px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px #0d50cc18;
+  padding: 36px 32px 32px 32px;
+  text-align: center;
+}
+
+.contact-container h2 {
+  color: #0d50cc;
+  font-weight: 800;
+  margin-bottom: 18px;
+  font-size: 2em;
+}
+
+.contact-details {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 28px;
+  text-align: left;
+}
+
+.contact-details li {
+  margin-bottom: 10px;
+  font-size: 1.08em;
+  color: #333;
+}
+
+.contact-details a {
+  color: #0d50cc;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contact-details a:hover {
+  color: #ff9800;
+  text-decoration: underline;
+}
+
+.contact-form {
+  margin-top: 18px;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #0d50cc;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #b0c4de;
+  border-radius: 8px;
+  font-size: 1em;
+  background: #f7f9fc;
+  transition: border 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border: 1.5px solid #0d50cc;
+  outline: none;
+  background: #e3eaff;
+}
+
+.contact-btn {
+  background: linear-gradient(90deg, #0d50cc 60%, #ff9800 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 32px;
+  font-size: 1.1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px #0d50cc22;
+}
+
+.contact-btn:hover {
+  background: linear-gradient(90deg, #ff9800 60%, #0d50cc 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+  </style>
+ 
 {% endblock %}

@@ -26,17 +26,25 @@ this details will directly fetch from students databases -->
 </section>
 
 
-
-
-<section class="contact-form">
-  <h2>Contact Us</h2>
-  <form action="/feedback" method="POST">
-      <input type="text" name="name" placeholder="Your Name" required>
-      <input type="email" name="email" placeholder="Your Email" required>
-      <textarea name="message" placeholder="Your Message" required></textarea>
-      <button type="submit">Send Message</button>
-  </form>
+<!-- Latest Announcements/Notices Section -->
+<section class="notice">
+    <h3>📢 Latest Announcements</h3>
+    <ul>
+        {% for notice in latest_notices %}
+        <li>
+            <strong>{{ notice.title }}</strong> - {{ notice.message }}
+            <span style="display:block; font-size:0.95em; color:#ffd700; margin-top:2px;">
+                {{ notice.created_at.strftime('%d %b %Y %H:%M') }}
+            </span>
+        </li>
+        {% else %}
+        <li>No announcements at the moment.</li>
+        {% endfor %}
+    </ul>
 </section>
+
+
+
 <div class="social-media">
     <h2>Follow Us</h2>
     <a href="https://www.facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
@@ -45,31 +53,48 @@ this details will directly fetch from students databases -->
     <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
 </div>
 
-<div class="subscribe-form">
-    <h2>Subscribe to Our Newsletter</h2>
-    <form action="/subscribe" method="POST">
-        <input type="email" name="email" placeholder="Your Email" required>
-        <button type="submit">Subscribe</button>
-    </form>
-</div>
+
 
 <div class="faq">
     <h2>Frequently Asked Questions</h2>
-    <ul>
-        <li><strong>How do I access my marksheet?</strong> You can log in to your account and navigate to the marksheet section.</li>
-        <li><strong>What if I forget my password?</strong> You can reset your password using the "Forgot Password" link on the login page.</li>
-        <li><strong>can i download my marksheet?</strong> Yes, you can download your marksheet in PDF format.</li> 
-    </ul>
+    <div class="faq-list">
+        <div class="faq-item">
+            <input type="checkbox" id="faq1">
+            <label for="faq1" class="faq-question">How do I access my marksheet?</label>
+            <div class="faq-answer">Log in to your account and navigate to the marksheet section from the dashboard.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq2">
+            <label for="faq2" class="faq-question">What if I forget my password?</label>
+            <div class="faq-answer">Click on the "Forgot Password" link on the login page and follow the instructions to reset your password.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq3">
+            <label for="faq3" class="faq-question">Can I download my marksheet?</label>
+            <div class="faq-answer">Yes, you can download your marksheet in PDF format from your account dashboard.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq4">
+            <label for="faq4" class="faq-question">How do I request a correction in my marksheet?</label>
+            <div class="faq-answer">Go to the "Request Correction" section after logging in and submit your request with the necessary details.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq5">
+            <label for="faq5" class="faq-question">Is my data secure on this portal?</label>
+            <div class="faq-answer">Yes, your data is encrypted and securely stored. We follow best practices to ensure your privacy and security.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq6">
+            <label for="faq6" class="faq-question">Who can I contact for technical support?</label>
+            <div class="faq-answer">You can contact our support team via the "Contact Us" page or email support@marksheetportal.com.</div>
+        </div>
+        <div class="faq-item">
+            <input type="checkbox" id="faq7">
+            <label for="faq7" class="faq-question">Can I view my previous exam results?</label>
+            <div class="faq-answer">Yes, all your previous exam results are available in your account under the "Results History" section.</div>
+        </div>
+    </div>
 </div>
 
 
-
-
-<section class="notice">
-    <h3>📢 Latest Notices</h3>
-    <ul>
-        <li>Semester 2 Results Published!</li>
-        <li>Last date for rechecking: 25th March</li>
-    </ul>
-</section>
 {% endblock %}

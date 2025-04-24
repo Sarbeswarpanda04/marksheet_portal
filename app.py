@@ -1886,6 +1886,17 @@ def index():
             LIMIT 3
         """, (exam_id,))
         top_students = cursor.fetchall()
+        
+        
+        # Fetch latest 5 notifications for all or students
+    cursor.execute("""
+        SELECT title, message, created_at 
+        FROM notifications 
+        WHERE audience = 'all' OR audience = 'admins'
+        ORDER BY created_at DESC 
+        LIMIT 5
+    """)
+    latest_notices = cursor.fetchall()
 
     conn.close()
     return render_template('index.html', top_students=top_students)

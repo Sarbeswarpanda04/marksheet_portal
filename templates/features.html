@@ -2,15 +2,128 @@
 
 {% block content %}
 <section class="features-section">
-  <div class="container">
+  <div class="features-container">
     <h2>Key Features</h2>
-    <ul>
-      <li>📊 View individual subject marks and GPA</li>
-      <li>📁 Download marksheets in PDF format</li>
-      <li>🔐 Secure login for students and faculty</li>
-      <li>🛠️ Admin dashboard to manage records</li>
-      <li>📅 Semester-wise result history</li>
-    </ul>
+    <div class="features-list">
+      <div class="feature-card">
+        <span class="feature-icon">📊</span>
+        <h3>View Marks & GPA</h3>
+        <p>Instantly access your subject-wise marks and GPA for every exam.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📁</span>
+        <h3>Download Marksheet</h3>
+        <p>Download your marksheet in PDF format for easy sharing and printing.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🔐</span>
+        <h3>Secure Login</h3>
+        <p>Safe and secure login for both students and faculty with encrypted data.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">🛠️</span>
+        <h3>Admin Dashboard</h3>
+        <p>Admins can manage student records, results, and notifications efficiently.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📅</span>
+        <h3>Result History</h3>
+        <p>View semester-wise result history and track your academic progress.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">📢</span>
+        <h3>Announcements</h3>
+        <p>Stay updated with the latest notices, exam schedules, and news.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-icon">💬</span>
+        <h3>Support & Feedback</h3>
+        <p>Contact support or submit feedback easily through the portal.</p>
+      </div>
+    </div>
   </div>
 </section>
+
+<style>
+  /* Features Section Styles */
+.features-section {
+  background: linear-gradient(120deg, #e3eaff 0%, #f7f9fc 100%);
+  padding: 60px 0 40px 0;
+  min-height: 60vh;
+}
+
+.features-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.features-container h2 {
+  color: #0d50cc;
+  font-weight: 800;
+  margin-bottom: 36px;
+  font-size: 2.2em;
+}
+
+.features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  justify-content: center;
+}
+
+.feature-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px #0d50cc18;
+  padding: 32px 24px 26px 24px;
+  width: 270px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.22s cubic-bezier(.4,2,.6,1), box-shadow 0.18s, background 0.22s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  animation: fadeInUp 1s;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px) scale(1.04) rotate(-1deg);
+  box-shadow: 0 12px 36px #2d6cdf33;
+  background: linear-gradient(120deg, #f8fafc 0%, #e3eaff 100%);
+}
+
+.feature-icon {
+  font-size: 2.5em;
+  margin-bottom: 14px;
+  color: #ff9800;
+  transition: color 0.2s;
+}
+
+.feature-card:hover .feature-icon {
+  color: #0d50cc;
+}
+
+.feature-card h3 {
+  color: #0d50cc;
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-size: 1.18em;
+  letter-spacing: 0.2px;
+}
+
+.feature-card p {
+  color: #333;
+  font-size: 1.04em;
+  margin: 0;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+</style>
 {% endblock %}

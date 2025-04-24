@@ -2,15 +2,170 @@
 
 {% block content %}
 <section class="help-section">
-  <div class="container">
-
-
-    <h2>Help & FAQs</h2>
-    <ul>
-      <li><strong>Q:</strong> How do I log in?<br><strong>A:</strong> Click the login button and enter your student credentials.</li>
-      <li><strong>Q:</strong> What if I forget my password?<br><strong>A:</strong> Use the "Forgot Password" option or contact admin.</li>
-      <li><strong>Q:</strong> Can I download my marksheet?<br><strong>A:</strong> Yes, once logged in, you can download it in PDF format.</li>
-    </ul>
+  <div class="help-container">
+    <h2>Help & Frequently Asked Questions</h2>
+    <p class="help-intro">
+      Need assistance? Browse the FAQs below or contact our support team for further help.
+    </p>
+    <div class="help-faq-list">
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq1">
+        <label for="hfaq1" class="help-faq-question">How do I log in?</label>
+        <div class="help-faq-answer">Click the login button on the homepage and enter your student credentials provided by the college.</div>
+      </div>
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq2">
+        <label for="hfaq2" class="help-faq-question">What if I forget my password?</label>
+        <div class="help-faq-answer">Use the "Forgot Password" option on the login page to reset your password, or contact the admin for assistance.</div>
+      </div>
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq3">
+        <label for="hfaq3" class="help-faq-question">Can I download my marksheet?</label>
+        <div class="help-faq-answer">Yes, after logging in, you can download your marksheet in PDF format from your dashboard.</div>
+      </div>
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq4">
+        <label for="hfaq4" class="help-faq-question">How do I request a correction in my marksheet?</label>
+        <div class="help-faq-answer">Go to the "Request Correction" section after logging in and submit your request with the necessary details.</div>
+      </div>
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq5">
+        <label for="hfaq5" class="help-faq-question">Is my data secure on this portal?</label>
+        <div class="help-faq-answer">Yes, your data is encrypted and securely stored. We follow best practices to ensure your privacy and security.</div>
+      </div>
+      <div class="help-faq-item">
+        <input type="checkbox" id="hfaq6">
+        <label for="hfaq6" class="help-faq-question">Who can I contact for technical support?</label>
+        <div class="help-faq-answer">You can contact our support team via the <a href="/contact">Contact Us</a> page or email support@college.edu.</div>
+      </div>
+    </div>
+    <div class="help-contact-box">
+      <h3>Still need help?</h3>
+      <p>
+        Email us at <a href="mailto:support@college.edu">support@college.edu</a> or call <a href="tel:+919876543210">+91-9876543210</a>.
+      </p>
+    </div>
   </div>
 </section>
+
+
+<style>
+  /* Help Section Styles */
+.help-section {
+  background: linear-gradient(120deg, #f7f9fc 0%, #e3eaff 100%);
+  padding: 60px 0 40px 0;
+  min-height: 70vh;
+}
+
+.help-container {
+  max-width: 700px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px #0d50cc18;
+  padding: 36px 32px 32px 32px;
+  text-align: center;
+}
+
+.help-container h2 {
+  color: #0d50cc;
+  font-weight: 800;
+  margin-bottom: 18px;
+  font-size: 2em;
+}
+
+.help-intro {
+  color: #333;
+  margin-bottom: 28px;
+  font-size: 1.1em;
+}
+
+.help-faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+.help-faq-item {
+  border-radius: 12px;
+  background: #f7f9fc;
+  box-shadow: 0 2px 8px #0d50cc0a;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+  position: relative;
+  text-align: left;
+}
+
+.help-faq-item input[type="checkbox"] {
+  display: none;
+}
+
+.help-faq-question {
+  display: block;
+  padding: 18px 22px;
+  font-size: 1.13em;
+  font-weight: 600;
+  color: #0d50cc;
+  cursor: pointer;
+  background: linear-gradient(90deg, #e3eaff 0%, #f7f9fc 100%);
+  transition: background 0.2s;
+  position: relative;
+}
+
+.help-faq-question::after {
+  content: "▼";
+  float: right;
+  font-size: 1em;
+  color: #6c0cc6;
+  transition: transform 0.3s;
+}
+
+.help-faq-item input[type="checkbox"]:checked + .help-faq-question::after {
+  transform: rotate(-180deg);
+}
+
+.help-faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  background: #f7f9fc;
+  color: #333;
+  font-size: 1.05em;
+  padding: 0 22px;
+  transition: max-height 0.4s cubic-bezier(.4,2,.6,1), padding 0.3s, background 0.3s;
+  border-left: 3px solid #0d50cc;
+}
+
+.help-faq-item input[type="checkbox"]:checked + .help-faq-question + .help-faq-answer {
+  max-height: 200px;
+  padding: 16px 22px 18px 22px;
+  background: #e3eaff;
+  animation: fadeInFaq 0.5s;
+}
+
+.help-contact-box {
+  margin-top: 30px;
+  background: #e3eaff;
+  border-radius: 10px;
+  padding: 18px 20px;
+  color: #0d50cc;
+  font-size: 1.1em;
+  box-shadow: 0 2px 8px #0d50cc0a;
+}
+
+.help-contact-box a {
+  color: #ff9800;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.help-contact-box a:hover {
+  text-decoration: underline;
+}
+
+@keyframes fadeInFaq {
+  from { opacity: 0; transform: translateY(-10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+</style>
 {% endblock %}

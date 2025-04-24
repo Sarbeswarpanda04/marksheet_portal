@@ -44,7 +44,12 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="login-container">
+        <div class="login-flex-container">
+            <div class="login-image-side">
+                <img src="{{ url_for('static', filename='images/login-side.png') }}" alt="Welcome" class="login-side-img">
+            </div>
+
+            <div class="login-container">
             <div class="login-card">
                 <!-- Login Type Toggle -->
                 <div class="login-toggle">
@@ -56,6 +61,7 @@
                     </button>
                     <div class="toggle-slider"></div>
                 </div>
+            
 
                 
                 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -121,6 +127,7 @@
                         <a href="{{ url_for('forgot_password') }}" class="forgot-password">Forgot Password?</a>
                     </div>
                 </form>
+            </div>
             </div>
         </div>
     </main>
