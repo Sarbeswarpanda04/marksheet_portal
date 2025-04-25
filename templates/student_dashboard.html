@@ -193,7 +193,6 @@
             <ul>
                 <li><a href="{{ url_for('student_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="{{ url_for('student_notifications') }}"><i class="fas fa-bell"></i> Notifications</a></li>
-                <li><a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
                 <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
@@ -289,11 +288,11 @@
     <div style="background:#f8fafc; border-radius:12px; box-shadow:0 2px 12px #2d6cdf11; padding:24px;">
         <table style="width:100%; border-collapse:collapse;">
             <tr style="background:#e0e7ff;">
-                <th style="padding:12px; color:#2d6cdf;">Exam</th>
-                <th style="padding:12px; color:#2d6cdf;">Subject</th>
-                <th style="padding:12px; color:#2d6cdf;">Status</th>
-                <th style="padding:12px; color:#2d6cdf;">Remark</th>
-                <th style="padding:12px; color:#2d6cdf;">Solved At</th>
+                <th style="padding:12px; color:white;">Exam</th>
+                <th style="padding:12px; color:white;">Subject</th>
+                <th style="padding:12px; color:white;">Status</th>
+                <th style="padding:12px; color:white;">Remark</th>
+                <th style="padding:12px; color:white;">Solved At</th>
             </tr>
             {% for req in student_rechecking_requests %}
             <tr style="text-align:center;">

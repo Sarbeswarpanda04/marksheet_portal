@@ -1,13 +1,14 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify, make_response
-import os  
-import mysql.connector
+from flask import Flask, render_template, request, redirect, session, url_for, flash, jsonify, make_response, send_file # Flask imports
+import os  # For file handling
+import mysql.connector   # MySQL Connector
 from flask_mail import Mail, Message
-import random
-import re
-import smtplib
-import datetime
-from datetime import timedelta
-import pdfkit
+import random   # For generating OTP
+import  re #use for regex validation
+import datetime  # For date and time handling
+from datetime import timedelta # For session expiration
+import pdfkit  #used for pdf generation
+ 
+
 
 app = Flask(__name__)
 app.secret_key = 'S@rb3sw@r_OTP_Se$$ion_Key_123!'  # Replace with a strong secret 
@@ -32,9 +33,8 @@ mail = Mail(app)
 #     return mysql.connector.connect(
 #         host='localhost',
 #         user='root',
-#         password='Sarbeswar@123',                 # Your MySQL root password
-#         database='marksheet_portal'               # Your database name
-#     )
+#         password='Sarbeswar@123',                 
+#         database='marksheet_portal'              
     
 # MySQL DB Connection
 def get_db_connection():
@@ -380,27 +380,6 @@ def student_dashboard():
         student_rechecking_requests=student_rechecking_requests
     )
 
-
-# @app.route('/apply-rechecking', methods=['POST'])
-# def apply_rechecking():
-#     if 'student_id' not in session:
-#         flash('Please log in.', 'danger')
-#         return redirect(url_for('login'))
-#     student_id = session['student_id']
-#     exam_id = request.form['exam_id']
-#     subject_id = request.form['subject_id']
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     # Prevent duplicate requests
-#     cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
-#     if cursor.fetchone():
-#         flash('Already applied for rechecking for this subject.', 'warning')
-#     else:
-#         cursor.execute("INSERT INTO rechecking_requests (student_id, exam_id, subject_id) VALUES (%s, %s, %s)", (student_id, exam_id, subject_id))
-#         conn.commit()
-#         flash('Rechecking request submitted.', 'success')
-#     conn.close()
-#     return redirect(url_for('student_dashboard'))
 
 @app.route('/apply-rechecking', methods=['POST'])
 def apply_rechecking():
@@ -995,6 +974,11 @@ def generate_marksheet(student_id):
         """, (student_id,))
     records = cursor.fetchall()
     conn.close()
+    
+    # qr_data = url_for('student_detail', student_id=student_id, _external=True)
+    # img = qrcode.make(qr_data)
+    # qr_path = f'static/qr_codes/qr_{student_id}.png'
+    # img.save(qr_path)
 
     # Render HTML
     rendered = render_template('marksheet.html', student=student, records=records)
@@ -1822,6 +1806,22 @@ def create_new_password():
         return redirect(url_for('login'))
 
     return render_template('new_password.html')
+
+
+
+
+
+
+
+@app.route('/generate_qr/<int:student_id>')
+def generate_qr(student_id):
+    # Example: encode a URL to the student's detail page
+    qr_data = url_for('student_detail', student_id=student_id, _external=True)
+    img = qrcode.make(qr_data)
+    buf = BytesIO()
+    img.save(buf)
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
 
 
 # ---------------- FEEDBACK ----------------
