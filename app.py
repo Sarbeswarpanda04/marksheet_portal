@@ -392,6 +392,13 @@ def apply_rechecking():
     reason = request.form['reason']
     conn = get_db_connection()
     cursor = conn.cursor()
+    # Check if marks are already 100
+    cursor.execute("SELECT marks_obtained FROM marks WHERE student_id=%s AND exam_id=%s AND subject_id=%s", (student_id, exam_id, subject_id))
+    result = cursor.fetchone()
+    if result and result[0] == 100:
+        flash('You already have 100 marks in this subject. Rechecking not allowed.', 'warning')
+        conn.close()
+        return redirect(url_for('student_dashboard'))
     # Prevent duplicate requests
     cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
     if cursor.fetchone():
@@ -405,6 +412,36 @@ def apply_rechecking():
         flash('Rechecking request submitted.', 'success')
     conn.close()
     return redirect(url_for('student_dashboard'))
+
+
+
+
+
+
+# @app.route('/apply-rechecking', methods=['POST'])
+# def apply_rechecking():
+#     if 'student_id' not in session:
+#         flash('Please log in.', 'danger')
+#         return redirect(url_for('login'))
+#     student_id = session['student_id']
+#     exam_id = request.form['exam_id']
+#     subject_id = request.form['subject_id']
+#     reason = request.form['reason']
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     # Prevent duplicate requests
+#     cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
+#     if cursor.fetchone():
+#         flash('Already applied for rechecking for this subject.', 'warning')
+#     else:
+#         cursor.execute(
+#             "INSERT INTO rechecking_requests (student_id, exam_id, subject_id, reason) VALUES (%s, %s, %s, %s)",
+#             (student_id, exam_id, subject_id, reason)
+#         )
+#         conn.commit()
+#         flash('Rechecking request submitted.', 'success')
+#     conn.close()
+#     return redirect(url_for('student_dashboard'))
 
 
 @app.route('/admin/rechecking-requests')

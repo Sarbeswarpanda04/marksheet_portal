@@ -382,23 +382,37 @@
         }
 
 
-            function openRecheckModal(exam_id) {
-                document.getElementById('recheckModal').style.display = 'block';
-                document.getElementById('modal_exam_id').value = exam_id;
-                // Fill subject dropdown
-                var subjects = {{ exams_dict|tojson }};
-                var select = document.getElementById('modal_subject_id');
-                select.innerHTML = '';
-                for (const row of subjects[exam_id].subjects) {
+        function openRecheckModal(exam_id) {
+            document.getElementById('recheckModal').style.display = 'block';
+            document.getElementById('modal_exam_id').value = exam_id;
+            // Fill subject dropdown
+            var subjects = {{ exams_dict|tojson }};
+            var select = document.getElementById('modal_subject_id');
+            select.innerHTML = '';
+            let hasEligible = false;
+            for (const row of subjects[exam_id].subjects) {
+                if (row.marks_obtained < 100) {
                     let opt = document.createElement('option');
                     opt.value = row.subject_id;
-                    opt.text = row.subject_name;
+                    opt.text = row.subject_name + " (" + row.marks_obtained + " marks)";
                     select.appendChild(opt);
+                    hasEligible = true;
                 }
             }
-            function closeRecheckModal() {
-                document.getElementById('recheckModal').style.display = 'none';
+            if (!hasEligible) {
+                let opt = document.createElement('option');
+                opt.value = '';
+                opt.text = 'All subjects have 100 marks. Rechecking not allowed.';
+                opt.disabled = true;
+                opt.selected = true;
+                select.appendChild(opt);
             }
+        }
+
+
+        function closeRecheckModal() {
+            document.getElementById('recheckModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>
