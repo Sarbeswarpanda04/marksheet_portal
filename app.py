@@ -1980,7 +1980,7 @@ def help_page():
 
 
 
-
+  
 
 # ---------------- LOGOUT ----------------
 @app.route('/logout')
@@ -1990,9 +1990,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-# ---------------- RUN FLASK ----------------
-# if __name__ == '__main__':
-#     app.run(debug=True)
 
 
 
@@ -2002,3 +1999,21 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
+
+#end of file
+# app.py
+# This is the main application file for the Marksheet Management Portal.
+# It contains routes for various functionalities including login, registration, marks management, and more.
+# The application uses Flask, a lightweight WSGI web application framework in Python.
+# The application is designed to manage student marks, grades, and notifications.
+# It also includes features for admin and student login, profile management, and feedback submission.
+# The application is connected to a MySQL database for data storage and retrieval.
+# The application also includes email functionality for sending notifications and OTPs.
+# The application uses Flask-Mail for email handling and Flask-Session for session management.
+# The application is designed to be user-friendly and responsive, with a focus on providing a seamless experience for both admins and students.
+# The application is built with security in mind, including password hashing and validation.
+# The application is designed to be scalable and can be extended with additional features as needed.
+# The application is structured with a clear separation of concerns, making it easy to maintain and update.
+# The application is designed to be deployed on a web server and can be accessed from any device with an internet connection.
+# The application is built using Python 3 and requires a compatible environment for deployment.
+# The application is licensed under the MIT License, allowing for free use and modification.
