@@ -27,15 +27,7 @@ app.config.update(
     MAIL_PASSWORD='redcvumsuuigdgra'            # Replace with your app password
 )
 mail = Mail(app)
-
-# # MySQL DB Connection
-# def get_db_connection():
-#     return mysql.connector.connect(
-#         host='localhost',
-#         user='root',
-#         password='Sarbeswar@123',                 
-#         database='marksheet_portal'              
-    
+   
 # MySQL DB Connection
 def get_db_connection():
     return mysql.connector.connect(
@@ -45,8 +37,7 @@ def get_db_connection():
         password='AVNS__Nh9xl2rlVgCUarubfp',                 # Your MySQL root password
         database='marksheet_portal'               # Your database name
     )
-  
-    
+   
 # ---------------- LOGIN ----------------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -77,13 +68,6 @@ def login():
 
         user = None
 
-        # if user_type == 'student':
-        #     cursor.execute("SELECT * FROM students WHERE reg_no = %s AND password = %s", (username, password))
-        #     user = cursor.fetchone()
-        # elif user_type == 'admin':
-        #     cursor.execute("SELECT * FROM admins WHERE admin_id = %s AND password = %s", (username, password))
-        #     user = cursor.fetchone()
-        
         if user_type == 'student':
           query = "SELECT * FROM students WHERE registration_number = %s AND password = %s"
           print("Executing query:", query, "with params:", (username, password))
@@ -120,9 +104,6 @@ def login():
                 session.permanent = True  # Session will use app.permanent_session_lifetime
             else:
                 session.permanent = False
-            # --- Remember Me logic END ---
-
-            
 
             otp = str(random.randint(100000, 999999))
             session['otp'] = otp
@@ -220,25 +201,6 @@ def login():
     return render_template('login.html')
 
 
-
-
-
-# ---------------- OTP VERIFICATION ----------------
-# @app.route('/verify_otp', methods=['GET', 'POST'])
-# def verify_otp():
-#     if request.method == 'POST':
-#         entered_otp = request.form.get('otp')
-#         if entered_otp == session.get('otp'):
-#             flash('Login Successful!', 'success')
-#             if session['user_type'] == 'student':
-#                 return redirect(url_for('student_dashboard'))
-#             else:
-#                 return redirect(url_for('admin_dashboard'))
-#         else:
-#             flash('Invalid OTP. Please try again.', 'danger')
-#             return redirect(url_for('verify_otp'))
-
-#     return render_template('verify_otp.html')
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
@@ -412,36 +374,6 @@ def apply_rechecking():
         flash('Rechecking request submitted.', 'success')
     conn.close()
     return redirect(url_for('student_dashboard'))
-
-
-
-
-
-
-# @app.route('/apply-rechecking', methods=['POST'])
-# def apply_rechecking():
-#     if 'student_id' not in session:
-#         flash('Please log in.', 'danger')
-#         return redirect(url_for('login'))
-#     student_id = session['student_id']
-#     exam_id = request.form['exam_id']
-#     subject_id = request.form['subject_id']
-#     reason = request.form['reason']
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     # Prevent duplicate requests
-#     cursor.execute("SELECT id FROM rechecking_requests WHERE student_id=%s AND exam_id=%s AND subject_id=%s AND status='Pending'", (student_id, exam_id, subject_id))
-#     if cursor.fetchone():
-#         flash('Already applied for rechecking for this subject.', 'warning')
-#     else:
-#         cursor.execute(
-#             "INSERT INTO rechecking_requests (student_id, exam_id, subject_id, reason) VALUES (%s, %s, %s, %s)",
-#             (student_id, exam_id, subject_id, reason)
-#         )
-#         conn.commit()
-#         flash('Rechecking request submitted.', 'success')
-#     conn.close()
-#     return redirect(url_for('student_dashboard'))
 
 
 @app.route('/admin/rechecking-requests')
@@ -620,9 +552,6 @@ def admin_dashboard():
     )
     
     
-    
-    
-    
 @app.route('/student-profile')
 def student_profile():
     conn = get_db_connection()
@@ -681,8 +610,6 @@ def add_student():
     
     flash('Student added successfully!', 'success')
     return redirect(url_for('student_profile'))
-
-
 
 
 import pandas as pd  # Add this import for handling Excel/CSV files
@@ -1033,11 +960,6 @@ def generate_marksheet(student_id):
     return response
 
 
-
-
-
-
-
 # Secure Admin Access
 @app.before_request
 def require_login():
@@ -1153,12 +1075,6 @@ def update_marks():
     return jsonify({'message': 'Marks updated successfully!'})
 
 
-
-
-
-
-
-
 # Update Marks for All Students
 @app.route('/update-all-marks', methods=['POST'])
 def update_all_marks():
@@ -1201,12 +1117,6 @@ def update_all_marks():
     return jsonify({'status': 'success', 'message': 'All marks updated successfully!'})
 
 
-
-
-
-
-
-
 @app.route('/add-edit-marks', methods=['POST'])
 def add_edit_marks():
     student_id = request.form['student_id']
@@ -1226,8 +1136,6 @@ def add_edit_marks():
     conn.close()
     flash('Marks saved successfully!', 'success')
     return redirect(url_for('student_detail', student_id=student_id))
-
-
 
 
 @app.route('/exam-grade-setup', methods=['GET', 'POST'])
@@ -1278,7 +1186,6 @@ def add_edit_exam():
     return redirect(url_for('exam_grade_setup'))
 
 
-
 @app.route('/delete-exam/<int:exam_id>')
 def delete_exam(exam_id):
     conn = get_db_connection()
@@ -1293,8 +1200,6 @@ def delete_exam(exam_id):
     conn.close()
     flash('Exam and all related data deleted.', 'success')
     return redirect(url_for('exam_grade_setup'))
-
-
 
 
 @app.route('/add-edit-grade', methods=['POST'])
@@ -1326,8 +1231,6 @@ def add_edit_grade():
     flash('Grade saved successfully!', 'success')
     return redirect(url_for('exam_grade_setup'))
 
-
-
 @app.route('/delete-grade/<int:grade_id>', methods=['GET'])
 def delete_grade(grade_id):
     conn = get_db_connection()
@@ -1341,8 +1244,6 @@ def delete_grade(grade_id):
 
     flash('Grade deleted successfully!', 'success')
     return redirect(url_for('exam_grade_setup'))
-
-
 
 @app.route('/notifications', methods=['GET', 'POST'])
 def notifications():
@@ -1629,101 +1530,6 @@ def settings():
 
     return render_template('settings.html', admin=admin)
 
-
-
-# @app.route('/add-student', methods=['POST'])
-# def add_student():
-#     name = request.form['name']
-#     student_class = request.form['class']
-#     dob = request.form['dob']
-#     roll_no = request.form['roll_no']
-#     reg_no = request.form['registration_no']
-#     father = request.form['father_name']
-#     mother = request.form['mother_name']
-#     password = request.form['password']
-#     profile = request.files['profile_photo']
-    
-#     profile_path = ''
-#     if profile:
-#         profile_path = os.path.join('static/uploads', profile.filename)
-#         profile.save(profile_path)
-
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     cursor.execute("""
-#         INSERT INTO students (name, class, dob, roll_no, registration_number, father_name, mother_name, password, profile_photo)
-#         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-#     """, (name, student_class, dob, roll_no, reg_no, father, mother, password, profile_path))
-#     conn.commit()
-#     conn.close()
-#     return redirect('/student-profile')
-
-
-# @app.route('/admin/dashboard')
-# def admin_dashboard():
-#     cur = mysql.connection.cursor()
-
-#     # Fetch counts
-#     cur.execute("SELECT COUNT(*) FROM students")
-#     total_students = cur.fetchone()[0]
-
-#     cur.execute("SELECT COUNT(*) FROM subjects")
-#     total_subjects = cur.fetchone()[0]
-
-#     cur.execute("SELECT COUNT(*) FROM exams")
-#     total_exams = cur.fetchone()[0]
-
-#     cur.execute("SELECT exam_id, student_id, generated_date FROM marksheet ORDER BY generated_date DESC LIMIT 1")
-#     latest_marksheet = cur.fetchone()
-
-#     cur.close()
-
-#     return render_template('admin_dashboard.html',
-#                            total_students=total_students,
-#                            total_subjects=total_subjects,
-#                            total_exams=total_exams,
-#                            latest_marksheet=latest_marksheet)
-
-
-# ---------------- FORGOT PASSWORD ----------------
-# @app.route('/forgot-password', methods=['GET', 'POST'])
-# def forgot_password():
-#     if request.method == 'POST':
-#         user_type = request.form.get('user_type')
-#         username = request.form.get('username')
-
-#         conn = get_db_connection()
-#         cursor = conn.cursor(dictionary=True)
-
-#         if user_type == 'student':
-#             cursor.execute("SELECT * FROM students WHERE reg_no = %s", (username,))
-#         else:
-#             cursor.execute("SELECT * FROM admins WHERE admin_id = %s", (username,))
-
-#         user = cursor.fetchone()
-#         cursor.close()
-#         conn.close()
-
-#         if user:
-#             session['reset_user'] = username
-#             session['reset_type'] = user_type
-#             session['reset_email'] = user['email']
-
-#             otp = str(random.randint(100000, 999999))
-#             session['reset_otp'] = otp
-
-#             msg = Message('OTP for Password Reset', sender='your_email@gmail.com', recipients=[user['email']])
-#             msg.body = f"Your OTP for password reset is: {otp}"
-#             mail.send(msg)
-
-#             flash('OTP sent to your email.', 'info')
-#             return redirect(url_for('reset_otp_verify'))
-#         else:
-#             flash('User not found.', 'danger')
-#             return redirect(url_for('forgot_password'))
-
-#     return render_template('forgot_password.html')
-
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -1768,20 +1574,6 @@ def forgot_password():
 
     return render_template('forgot_password.html')
 
-
-
-
-# @app.route('/verify_reset_otp', methods=['GET', 'POST'])
-# def verify_reset_otp():
-#     if request.method == 'POST':
-#         entered_otp = request.form.get('otp')
-#         if entered_otp == session.get('reset_otp'):
-#             flash("OTP verified! Set your new password.", "success")
-#             return redirect(url_for('reset_password'))
-#         else:
-#             flash("Incorrect OTP. Try again.", "danger")
-#             return redirect(url_for('verify_reset_otp'))
-#     return render_template('verify_reset_otp.html')
 
 
 @app.route('/reset_password', methods=['GET', 'POST'])
@@ -1843,60 +1635,6 @@ def create_new_password():
         return redirect(url_for('login'))
 
     return render_template('new_password.html')
-
-
-
-
-
-
-
-@app.route('/generate_qr/<int:student_id>')
-def generate_qr(student_id):
-    # Example: encode a URL to the student's detail page
-    qr_data = url_for('student_detail', student_id=student_id, _external=True)
-    img = qrcode.make(qr_data)
-    buf = BytesIO()
-    img.save(buf)
-    buf.seek(0)
-    return send_file(buf, mimetype='image/png')
-
-
-# ---------------- FEEDBACK ----------------
-@app.route('/feedback', methods=['GET', 'POST'])
-def feedback():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        message = request.form.get('message')
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("INSERT INTO feedback (name, email, message) VALUES (%s, %s, %s)", (name, email, message))
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        flash('Feedback submitted successfully.', 'success')
-        return redirect(url_for('feedback'))
-
-    return render_template('feedback.html')
-
-
-@app.route('/admin/feedback')
-def admin_feedback():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM feedback")
-    feedbacks = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return render_template('admin_feedback.html', feedbacks=feedbacks)
-
-
-
-
-# ----------------  ----------------
-
 
 # ---------------- BASIC PAGES ----------------
 @app.route('/')
@@ -1999,21 +1737,3 @@ def page_not_found(e):
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
-
-#end of file
-# app.py
-# This is the main application file for the Marksheet Management Portal.
-# It contains routes for various functionalities including login, registration, marks management, and more.
-# The application uses Flask, a lightweight WSGI web application framework in Python.
-# The application is designed to manage student marks, grades, and notifications.
-# It also includes features for admin and student login, profile management, and feedback submission.
-# The application is connected to a MySQL database for data storage and retrieval.
-# The application also includes email functionality for sending notifications and OTPs.
-# The application uses Flask-Mail for email handling and Flask-Session for session management.
-# The application is designed to be user-friendly and responsive, with a focus on providing a seamless experience for both admins and students.
-# The application is built with security in mind, including password hashing and validation.
-# The application is designed to be scalable and can be extended with additional features as needed.
-# The application is structured with a clear separation of concerns, making it easy to maintain and update.
-# The application is designed to be deployed on a web server and can be accessed from any device with an internet connection.
-# The application is built using Python 3 and requires a compatible environment for deployment.
-# The application is licensed under the MIT License, allowing for free use and modification.
